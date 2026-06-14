@@ -1,0 +1,125 @@
+<Window x:Class="AutoPartsPOS.WPF.Catalog.Dialogs.ProductDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="{Binding DialogTitle}"
+        Width="720"
+        Height="640"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        FlowDirection="RightToLeft"
+        Language="ar-EG"
+        Background="{DynamicResource MaterialDesignPaper}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock FontSize="22"
+                   FontWeight="SemiBold"
+                   Text="{Binding DialogTitle}" />
+
+        <Grid Grid.Row="1" Margin="0,24,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="14" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="14" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="14" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="14" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBox Grid.Row="0"
+                     Grid.Column="0"
+                     materialDesign:HintAssist.Hint="كود المنتج"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                     Text="{Binding ProductCode, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+
+            <TextBox Grid.Row="0"
+                     Grid.Column="2"
+                     materialDesign:HintAssist.Hint="الباركود"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                     Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBox Grid.Row="2"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="3"
+                     materialDesign:HintAssist.Hint="اسم المنتج"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                     Text="{Binding NameAr, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+
+            <ComboBox Grid.Row="4"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="3"
+                      DisplayMemberPath="NameAr"
+                      ItemsSource="{Binding Categories}"
+                      SelectedValue="{Binding CategoryId, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                      SelectedValuePath="Id"
+                      materialDesign:HintAssist.Hint="التصنيف"
+                          Style="{StaticResource ModernComboBoxStyle}" />
+
+            <TextBox Grid.Row="6"
+                     Grid.Column="0"
+                     materialDesign:HintAssist.Hint="سعر الشراء"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                     Text="{Binding PurchasePrice, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N2}" />
+
+            <TextBox Grid.Row="6"
+                     Grid.Column="2"
+                     materialDesign:HintAssist.Hint="سعر البيع"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                     Text="{Binding SellingPrice, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N2}" />
+
+            <TextBox Grid.Row="8"
+                     Grid.Column="0"
+                     materialDesign:HintAssist.Hint="المخزون الحالي"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                     Text="{Binding CurrentStock, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N3}" />
+
+            <TextBox Grid.Row="8"
+                     Grid.Column="2"
+                     materialDesign:HintAssist.Hint="الحد الأدنى للمخزون"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                     Text="{Binding MinimumStock, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N3}" />
+
+            <StackPanel Grid.Row="9"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Margin="0,14,0,0">
+                <CheckBox Content="نشط"
+                          IsChecked="{Binding IsActive}"
+                          Style="{StaticResource MaterialDesignCheckBox}" />
+
+                <TextBlock Margin="0,12,0,0"
+                           Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                           Text="{Binding ErrorMessage}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="2"
+                    HorizontalAlignment="Left"
+                    Orientation="Horizontal">
+            <Button Command="{Binding SaveCommand}"
+                    Content="حفظ"
+                    IsDefault="True"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+            <Button Margin="8,0,0,0"
+                    Command="{Binding CancelCommand}"
+                    Content="إلغاء"
+                    IsCancel="True"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</Window>

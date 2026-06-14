@@ -1,0 +1,75 @@
+<Application x:Class="AutoPartsPOS.WPF.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:catalogConverters="clr-namespace:AutoPartsPOS.WPF.Catalog.Converters"
+             xmlns:catalogViews="clr-namespace:AutoPartsPOS.WPF.Catalog.Views"
+             xmlns:catalogViewModels="clr-namespace:AutoPartsPOS.WPF.Catalog.ViewModels"
+             xmlns:converters="clr-namespace:AutoPartsPOS.WPF.Converters"
+             xmlns:inventoryViews="clr-namespace:AutoPartsPOS.WPF.Inventory.Views"
+             xmlns:inventoryViewModels="clr-namespace:AutoPartsPOS.WPF.Inventory.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:purchaseViews="clr-namespace:AutoPartsPOS.WPF.Purchases.Views"
+             xmlns:purchaseViewModels="clr-namespace:AutoPartsPOS.WPF.Purchases.ViewModels"
+             xmlns:reportViews="clr-namespace:AutoPartsPOS.WPF.Reports.Views"
+             xmlns:reportViewModels="clr-namespace:AutoPartsPOS.WPF.Reports.ViewModels"
+             xmlns:salesViews="clr-namespace:AutoPartsPOS.WPF.Sales.Views"
+             xmlns:salesViewModels="clr-namespace:AutoPartsPOS.WPF.Sales.ViewModels"
+             xmlns:settingsViews="clr-namespace:AutoPartsPOS.WPF.Settings.Views"
+             xmlns:settingsViewModels="clr-namespace:AutoPartsPOS.WPF.Settings.ViewModels"
+             xmlns:supplierViews="clr-namespace:AutoPartsPOS.WPF.Suppliers.Views"
+             xmlns:supplierViewModels="clr-namespace:AutoPartsPOS.WPF.Suppliers.ViewModels"
+             xmlns:views="clr-namespace:AutoPartsPOS.WPF.Views"
+             xmlns:viewModels="clr-namespace:AutoPartsPOS.WPF.ViewModels">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Light"
+                                             PrimaryColor="Teal"
+                                             SecondaryColor="Amber" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+                <ResourceDictionary Source="Themes/DesignSystem.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <catalogConverters:StockStatusBrushConverter x:Key="StockStatusBrushConverter" />
+            <catalogConverters:StockStatusTextConverter x:Key="StockStatusTextConverter" />
+            <converters:ActivePageConverter x:Key="ActivePageConverter" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+            <DataTemplate DataType="{x:Type viewModels:HomeViewModel}">
+                <views:HomeView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type catalogViewModels:CategoriesViewModel}">
+                <catalogViews:CategoriesView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type catalogViewModels:ProductsViewModel}">
+                <catalogViews:ProductsView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type supplierViewModels:SuppliersViewModel}">
+                <supplierViews:SuppliersView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type settingsViewModels:AppSettingsViewModel}">
+                <settingsViews:AppSettingsView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type purchaseViewModels:PurchaseInvoicesViewModel}">
+                <purchaseViews:PurchaseInvoicesView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type inventoryViewModels:InventoryLedgerViewModel}">
+                <inventoryViews:InventoryLedgerView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type salesViewModels:SalesInvoicesViewModel}">
+                <salesViews:SalesInvoicesView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type reportViewModels:ReportsViewModel}">
+                <reportViews:ReportsView />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

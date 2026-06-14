@@ -1,0 +1,73 @@
+<UserControl x:Class="AutoPartsPOS.WPF.Purchases.Views.PurchaseInvoicesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             FlowDirection="RightToLeft"
+             Language="ar-EG">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top"
+                    Margin="0,0,0,16"
+                    Orientation="Horizontal">
+            <TextBox Width="320"
+                     materialDesign:HintAssist.Hint="بحث برقم الفاتورة أو المورد"
+                     Style="{StaticResource ModernTextBoxStyle}"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Button Margin="8,0,0,0"
+                    Command="{Binding SearchCommand}"
+                    Content="بحث"
+                    Style="{StaticResource PrimaryButtonStyle}" />
+
+            <Button Margin="8,0,0,0"
+                    Command="{Binding CreateCommand}"
+                    Content="فاتورة جديدة"
+                    Style="{StaticResource PrimaryButtonStyle}" />
+
+            <Button Margin="8,0,0,0"
+                    Command="{Binding ViewCommand}"
+                    Content="عرض"
+                    Style="{StaticResource SecondaryButtonStyle}" />
+
+            <Button Margin="8,0,0,0"
+                    Command="{Binding VoidCommand}"
+                    Content="إلغاء"
+                    Style="{StaticResource DangerButtonStyle}" />
+        </StackPanel>
+
+        <TextBlock DockPanel.Dock="Bottom"
+                   Margin="0,12,0,0"
+                   Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                   Text="{Binding ErrorMessage}"
+                   TextWrapping="Wrap" />
+
+        <DataGrid AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True"
+                  ItemsSource="{Binding Invoices}"
+                  SelectedItem="{Binding SelectedInvoice}"
+                  SelectionMode="Single"
+                  Style="{StaticResource ModernDataGridStyle}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="160"
+                                    Binding="{Binding InvoiceNumber}"
+                                    Header="رقم الفاتورة" />
+                <DataGridTextColumn Width="180"
+                                    Binding="{Binding SupplierNameAr}"
+                                    Header="المورد" />
+                <DataGridTextColumn Width="130"
+                                    Binding="{Binding InvoiceDate}"
+                                    Header="التاريخ" />
+                <DataGridTextColumn Width="120"
+                                    Binding="{Binding Status}"
+                                    Header="الحالة" />
+                <DataGridTextColumn Width="140"
+                                    Binding="{Binding TotalAmount, StringFormat=N2}"
+                                    Header="الإجمالي" />
+                <DataGridTextColumn Width="2*"
+                                    Binding="{Binding Notes}"
+                                    Header="ملاحظات" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

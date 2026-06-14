@@ -1,0 +1,56 @@
+<UserControl x:Class="AutoPartsPOS.WPF.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             FlowDirection="RightToLeft"
+             Language="ar-EG">
+    <UserControl.Resources>
+        <Style x:Key="KpiCardStyle" TargetType="Border" BasedOn="{StaticResource CardStyle}">
+            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="Padding" Value="18" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <DockPanel Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource PageTitleStyle}" Text="لوحة التحكم" />
+                    <TextBlock Margin="0,5,0,0" Style="{StaticResource PageSubtitleStyle}" Text="نظرة سريعة على أداء المتجر والمخزون" />
+                </StackPanel>
+                <Button DockPanel.Dock="Left" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButtonStyle}">
+                    <StackPanel Orientation="Horizontal"><materialDesign:PackIcon Margin="0,0,7,0" Kind="Refresh"/><TextBlock Text="تحديث البيانات"/></StackPanel>
+                </Button>
+            </DockPanel>
+
+            <UniformGrid Margin="0,0,0,20" Columns="4">
+                <Border Style="{StaticResource KpiCardStyle}">
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/></Grid.ColumnDefinitions><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="مبيعات اليوم"/><TextBlock Margin="0,10,0,0" FontSize="25" FontWeight="Bold" Text="{Binding TodaySales, StringFormat=N2}"/><TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppSuccessBrush}" FontSize="11" Text="إجمالي اليوم"/></StackPanel><Border Grid.Column="1" Width="46" Height="46" VerticalAlignment="Top" Background="#ECFDF3" CornerRadius="12"><materialDesign:PackIcon HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AppSuccessBrush}" Kind="CashMultiple"/></Border></Grid>
+                </Border>
+                <Border Style="{StaticResource KpiCardStyle}">
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/></Grid.ColumnDefinitions><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="مبيعات الشهر"/><TextBlock Margin="0,10,0,0" FontSize="25" FontWeight="Bold" Text="{Binding CurrentMonthSales, StringFormat=N2}"/><TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppPrimaryBrush}" FontSize="11" Text="من بداية الشهر"/></StackPanel><Border Grid.Column="1" Width="46" Height="46" VerticalAlignment="Top" Background="#EFF6FF" CornerRadius="12"><materialDesign:PackIcon HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AppPrimaryBrush}" Kind="ChartLine"/></Border></Grid>
+                </Border>
+                <Border Style="{StaticResource KpiCardStyle}">
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/></Grid.ColumnDefinitions><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="عدد الفواتير"/><TextBlock Margin="0,10,0,0" FontSize="25" FontWeight="Bold" Text="{Binding InvoiceCount}"/><TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppMutedTextBrush}" FontSize="11" Text="فاتورة هذا الشهر"/></StackPanel><Border Grid.Column="1" Width="46" Height="46" VerticalAlignment="Top" Background="#F5F3FF" CornerRadius="12"><materialDesign:PackIcon HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#7C3AED" Kind="ReceiptTextOutline"/></Border></Grid>
+                </Border>
+                <Border Margin="0" Style="{StaticResource KpiCardStyle}">
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/></Grid.ColumnDefinitions><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="قيمة المخزون"/><TextBlock Margin="0,10,0,0" FontSize="25" FontWeight="Bold" Text="{Binding InventoryValue, StringFormat=N2}"/><TextBlock Margin="0,8,0,0" Foreground="{DynamicResource AppWarningBrush}" FontSize="11" Text="{Binding LowStockCount, StringFormat={}{0} صنف منخفض}"/></StackPanel><Border Grid.Column="1" Width="46" Height="46" VerticalAlignment="Top" Background="#FFF7ED" CornerRadius="12"><materialDesign:PackIcon HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AppWarningBrush}" Kind="Warehouse"/></Border></Grid>
+                </Border>
+            </UniformGrid>
+
+            <Border Style="{StaticResource CardStyle}">
+                <TabControl Background="Transparent" Style="{StaticResource MaterialDesignTabControl}">
+                    <TabItem Header="الأكثر مبيعاً"><DataGrid Margin="0,14,0,0" AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding TopSellingProducts}" Style="{StaticResource ModernDataGridStyle}"><DataGrid.Columns><DataGridTextColumn Width="*" Header="المنتج" Binding="{Binding ProductNameAr}" /><DataGridTextColumn Header="الكمية المباعة" Binding="{Binding QuantitySold, StringFormat=N3}" /><DataGridTextColumn Header="إجمالي المبيعات" Binding="{Binding SalesAmount, StringFormat=N2}" /></DataGrid.Columns></DataGrid></TabItem>
+                    <TabItem Header="تنبيهات المخزون"><DataGrid Margin="0,14,0,0" AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding LowStockProducts}" Style="{StaticResource ModernDataGridStyle}"><DataGrid.Columns><DataGridTextColumn Header="الكود" Binding="{Binding ProductCode}" /><DataGridTextColumn Width="*" Header="المنتج" Binding="{Binding ProductNameAr}" /><DataGridTextColumn Header="الرصيد الحالي" Binding="{Binding CurrentStock, StringFormat=N3}" /><DataGridTextColumn Header="الحد الأدنى" Binding="{Binding MinimumStock, StringFormat=N3}" /></DataGrid.Columns></DataGrid></TabItem>
+                    <TabItem Header="بطيئة الحركة"><DataGrid Margin="0,14,0,0" AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding SlowMovingProducts}" Style="{StaticResource ModernDataGridStyle}"><DataGrid.Columns><DataGridTextColumn Width="*" Header="المنتج" Binding="{Binding ProductNameAr}" /><DataGridTextColumn Header="الرصيد الحالي" Binding="{Binding CurrentStock, StringFormat=N3}" /><DataGridTextColumn Header="آخر عملية بيع" Binding="{Binding LastSaleDate}" /></DataGrid.Columns></DataGrid></TabItem>
+                    <TabItem Header="اقتراحات إعادة الطلب"><DataGrid Margin="0,14,0,0" AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding ReorderSuggestions}" Style="{StaticResource ModernDataGridStyle}"><DataGrid.Columns><DataGridTextColumn Width="*" Header="المنتج" Binding="{Binding ProductNameAr}" /><DataGridTextColumn Header="المبيعات الشهرية المتوقعة" Binding="{Binding ExpectedMonthlySales, StringFormat=N3}" /><DataGridTextColumn Header="الرصيد الحالي" Binding="{Binding CurrentStock, StringFormat=N3}" /><DataGridTextColumn Header="الكمية المقترحة" Binding="{Binding SuggestedQuantity, StringFormat=N3}" /></DataGrid.Columns></DataGrid></TabItem>
+                </TabControl>
+            </Border>
+
+            <Border>
+                <Border.Style><Style TargetType="Border" BasedOn="{StaticResource ErrorBannerStyle}"><Style.Triggers><DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger><DataTrigger Binding="{Binding ErrorMessage}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                <TextBlock Foreground="{DynamicResource AppDangerBrush}" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

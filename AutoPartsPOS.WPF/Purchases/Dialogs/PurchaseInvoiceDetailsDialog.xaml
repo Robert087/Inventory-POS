@@ -1,0 +1,51 @@
+<Window x:Class="AutoPartsPOS.WPF.Purchases.Dialogs.PurchaseInvoiceDetailsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Title}"
+        Width="820"
+        Height="620"
+        WindowStartupLocation="CenterOwner"
+        FlowDirection="RightToLeft"
+        Language="ar-EG"
+        Background="{DynamicResource MaterialDesignPaper}">
+    <DockPanel Margin="20">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+            <TextBlock FontSize="22"
+                       FontWeight="SemiBold"
+                       Text="{Binding Invoice.InvoiceNumber}" />
+            <TextBlock Margin="0,8,0,0"
+                       Text="{Binding Invoice.SupplierNameAr, StringFormat=المورد: {0}}" />
+            <TextBlock Text="{Binding Invoice.InvoiceDate, StringFormat=التاريخ: {0}}" />
+            <TextBlock Text="{Binding Invoice.Status, StringFormat=الحالة: {0}}" />
+            <TextBlock Text="{Binding Invoice.TotalAmount, StringFormat=الإجمالي: {0:N2}}" />
+        </StackPanel>
+
+        <Button DockPanel.Dock="Bottom"
+                Margin="0,16,0,0"
+                HorizontalAlignment="Left"
+                Command="{Binding CloseCommand}"
+                Content="إغلاق"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+
+        <DataGrid AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  ItemsSource="{Binding Invoice.Items}"
+                  Style="{StaticResource ModernDataGridStyle}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="2*"
+                                    Binding="{Binding ProductNameAr}"
+                                    Header="المنتج" />
+                <DataGridTextColumn Width="120"
+                                    Binding="{Binding Quantity, StringFormat=N3}"
+                                    Header="الكمية" />
+                <DataGridTextColumn Width="120"
+                                    Binding="{Binding UnitPrice, StringFormat=N2}"
+                                    Header="سعر الوحدة" />
+                <DataGridTextColumn Width="140"
+                                    Binding="{Binding TotalPrice, StringFormat=N2}"
+                                    Header="الإجمالي" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>

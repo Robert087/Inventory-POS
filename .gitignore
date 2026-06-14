@@ -1,0 +1,39 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# Visual Studio / IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local tooling
+.sixth/
+
+# Runtime data
+Data/
+Logs/
+Backups/
+**/Data/
+**/Logs/
+**/Backups/
+*.db
+*.db-shm
+*.db-wal
+
+# Publish and deployment validation
+publish/
+deployment-validation/
+deployment-validation-relocated/
+
+# Test and coverage artifacts
+TestResults/
+coverage/
+*.trx
+
+# OS files
+Thumbs.db
+.DS_Store

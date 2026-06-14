@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="AutoPartsPOS.Application/AutoPartsPOS.Application.csproj" />
+  <Project Path="AutoPartsPOS.Domain/AutoPartsPOS.Domain.csproj" />
+  <Project Path="AutoPartsPOS.Infrastructure/AutoPartsPOS.Infrastructure.csproj" />
+  <Project Path="AutoPartsPOS.Persistence/AutoPartsPOS.Persistence.csproj" />
+  <Project Path="AutoPartsPOS.RuntimeValidation/AutoPartsPOS.RuntimeValidation.csproj" />
+  <Project Path="AutoPartsPOS.WPF/AutoPartsPOS.WPF.csproj" />
+</Solution>

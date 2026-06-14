@@ -1,0 +1,112 @@
+<UserControl x:Class="AutoPartsPOS.WPF.Settings.Views.AppSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             FlowDirection="RightToLeft"
+             Language="ar-EG">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid MaxWidth="860">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Text="إعدادات التطبيق" />
+
+            <Grid Grid.Row="1" Margin="0,24,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="14" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="14" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="14" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="14" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBox Grid.Row="0"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         materialDesign:HintAssist.Hint="اسم المتجر"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding StoreName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+
+                <TextBox Grid.Row="2"
+                         Grid.Column="0"
+                         materialDesign:HintAssist.Hint="هاتف المتجر"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding StorePhone, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBox Grid.Row="2"
+                         Grid.Column="2"
+                         materialDesign:HintAssist.Hint="رمز العملة"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding CurrencySymbol, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+
+                <TextBox Grid.Row="4"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="3"
+                         Height="90"
+                         AcceptsReturn="True"
+                         materialDesign:HintAssist.Hint="عنوان المتجر"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding StoreAddress, UpdateSourceTrigger=PropertyChanged}" />
+
+                <CheckBox Grid.Row="6"
+                          Grid.Column="0"
+                          Content="تفعيل تنبيه المخزون المنخفض"
+                          IsChecked="{Binding LowStockAlertEnabled}"
+                          Style="{StaticResource MaterialDesignCheckBox}" />
+
+                <TextBox Grid.Row="8"
+                         Grid.Column="0"
+                         materialDesign:HintAssist.Hint="أيام المنتجات بطيئة الحركة"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding SlowMovingDays, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+
+                <TextBox Grid.Row="8"
+                         Grid.Column="2"
+                         materialDesign:HintAssist.Hint="أيام المنتجات الأكثر مبيعاً"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding TopSellingDays, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+            </Grid>
+
+            <StackPanel Grid.Row="2" Margin="0,24,0,0">
+                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                    <Button Command="{Binding SaveCommand}"
+                            Content="حفظ"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+                    <Button Margin="8,0,0,0"
+                            Command="{Binding ResetCommand}"
+                            Content="استعادة الافتراضي"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+                </StackPanel>
+
+                <ItemsControl Margin="0,14,0,0" ItemsSource="{Binding SaveMessages}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Foreground="ForestGreen"
+                                       Text="{Binding}"
+                                       TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Margin="0,12,0,0"
+                           Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                           Text="{Binding ErrorMessage}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
