@@ -30,7 +30,7 @@ public sealed partial class ProductsViewModel(
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        Title = "المنتجات";
+        Title = "الأصناف";
         await LoadCategoriesAsync(cancellationToken);
         await LoadAsync(cancellationToken);
     }

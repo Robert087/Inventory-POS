@@ -6,4 +6,6 @@ public sealed record SalesInvoiceItemDto(
     string ProductNameAr,
     decimal Quantity,
     decimal UnitPrice,
-    decimal TotalPrice);
+    decimal TotalPrice,
+    decimal UnitCost,
+    decimal TotalCost);

@@ -22,7 +22,7 @@ public sealed class ReportingRepository(AppDbContext dbContext) : IReportingRepo
     {
         var lines = await dbContext.SalesInvoiceItems.AsNoTracking()
             .Where(item => item.SalesInvoice != null && item.SalesInvoice.Status == SalesInvoiceStatus.Posted && item.SalesInvoice.InvoiceDate >= fromDate && item.SalesInvoice.InvoiceDate <= toDate)
-            .Select(item => new { Revenue = item.TotalPrice, Cost = item.Quantity * (item.Product == null ? 0 : item.Product.PurchasePrice) })
+            .Select(item => new { Revenue = item.TotalPrice, Cost = item.TotalCost })
             .ToListAsync(cancellationToken);
         var discounts = await dbContext.SalesInvoices.AsNoTracking()
             .Where(invoice => invoice.Status == SalesInvoiceStatus.Posted && invoice.InvoiceDate >= fromDate && invoice.InvoiceDate <= toDate)
@@ -39,7 +39,7 @@ public sealed class ReportingRepository(AppDbContext dbContext) : IReportingRepo
         var items = await dbContext.Products.AsNoTracking()
             .Where(product => product.IsActive)
             .OrderBy(product => product.NameAr)
-            .Select(product => new InventoryReportItemDto(product.Id, product.ProductCode, product.NameAr, product.CurrentStock, product.PurchasePrice, product.CurrentStock * product.PurchasePrice, product.MinimumStock, product.CurrentStock <= product.MinimumStock))
+            .Select(product => new InventoryReportItemDto(product.Id, product.ProductCode, product.NameAr, product.CurrentStock, product.CurrentAverageCost, product.CurrentStock * product.CurrentAverageCost, product.MinimumStock, product.CurrentStock <= product.MinimumStock))
             .ToListAsync(cancellationToken);
 
         return new InventoryReportDto(items.Sum(item => item.CurrentStock), items.Sum(item => item.InventoryValue), items.Count(item => item.IsLowStock), items);

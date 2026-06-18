@@ -1,4 +1,4 @@
-﻿using AutoPartsPOS.Application.Sales.Dtos;
+using AutoPartsPOS.Application.Sales.Dtos;
 using AutoPartsPOS.Application.Sales.Interfaces;
 using AutoPartsPOS.Domain.Sales;
 using Microsoft.EntityFrameworkCore;
@@ -67,7 +67,9 @@ public sealed class SalesInvoiceRepository(AppDbContext dbContext) : ISalesInvoi
                     item.Product?.NameAr ?? string.Empty,
                     item.Quantity,
                     item.UnitPrice,
-                    item.TotalPrice))
+                    item.TotalPrice,
+                    item.UnitCost,
+                    item.TotalCost))
                 .ToList());
     }
 
@@ -93,10 +95,9 @@ public sealed class SalesInvoiceRepository(AppDbContext dbContext) : ISalesInvoi
     {
         return status switch
         {
-            SalesInvoiceStatus.Posted => "Ù…Ø±Ø­Ù„Ø©",
-            SalesInvoiceStatus.Voided => "Ù…Ù„ØºØ§Ø©",
+            SalesInvoiceStatus.Posted => "مُرحّلة",
+            SalesInvoiceStatus.Voided => "ملغاة",
             _ => status.ToString()
         };
     }
 }
-

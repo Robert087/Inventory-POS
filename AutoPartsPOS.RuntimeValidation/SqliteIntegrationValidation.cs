@@ -82,7 +82,9 @@ internal static class SqliteIntegrationValidation
             InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
             Items = [new CreatePurchaseInvoiceItemDto { ProductId = product.Id, Quantity = 10, UnitPrice = 10 }]
         })).Succeeded, "Purchase invoice creation failed.");
-        Assert((await productService.GetByIdAsync(product.Id))!.CurrentStock == 10, "Purchase did not increase stock.");
+        var productAfterPurchase = (await productService.GetByIdAsync(product.Id))!;
+        Assert(productAfterPurchase.CurrentStock == 10, "Purchase did not increase stock.");
+        Assert(productAfterPurchase.CurrentAverageCost == 10, "Purchase did not set weighted average cost.");
 
         Assert((await salesService.CreateAsync(new CreateSalesInvoiceDto
         {
@@ -94,6 +96,9 @@ internal static class SqliteIntegrationValidation
         Assert((await productService.GetByIdAsync(product.Id))!.CurrentStock == 6, "Sale did not decrease stock.");
 
         var sale = (await salesService.SearchAsync("SAL-SQLITE-001")).Single();
+        var saleDetails = await salesService.GetDetailsAsync(sale.Id);
+        Assert(saleDetails!.Items.Single().UnitCost == 10, "Sale did not store WAC unit cost snapshot.");
+        Assert(saleDetails.Items.Single().TotalCost == 40, "Sale did not store WAC total cost snapshot.");
         Assert((await salesService.VoidAsync(sale.Id, "اختبار SQLite")).Succeeded, "Sales void failed.");
         Assert((await productService.GetByIdAsync(product.Id))!.CurrentStock == 10, "Sales void did not restore stock.");
 

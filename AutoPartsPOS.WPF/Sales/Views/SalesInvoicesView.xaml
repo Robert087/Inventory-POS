@@ -4,73 +4,110 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              FlowDirection="RightToLeft"
              Language="ar-EG">
-    <DockPanel>
-        <StackPanel DockPanel.Dock="Top"
-                    Margin="0,0,0,16"
-                    Orientation="Horizontal">
-            <TextBox Width="320"
-                     materialDesign:HintAssist.Hint="بحث برقم الفاتورة"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <Button Margin="8,0,0,0"
-                    Command="{Binding SearchCommand}"
-                    Content="بحث"
-                    Style="{StaticResource PrimaryButtonStyle}" />
+        <Border Grid.Row="0" Style="{StaticResource ToolbarCardStyle}">
+            <StackPanel>
+                <Grid FlowDirection="LeftToRight">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding CreateCommand}" Style="{StaticResource PrimaryButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="Plus" />
+                                <TextBlock Text="إضافة" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="8,0,0,0" Command="{Binding ViewCommand}" Style="{StaticResource SecondaryButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="EyeOutline" />
+                                <TextBlock Text="عرض" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="8,0,0,0" Command="{Binding VoidCommand}" Style="{StaticResource DangerButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="Cancel" />
+                                <TextBlock Text="إلغاء" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource PageTitleStyle}" Text="المبيعات" />
+                </Grid>
 
-            <Button Margin="8,0,0,0"
-                    Command="{Binding CreateCommand}"
-                    Content="فاتورة جديدة"
-                    Style="{StaticResource PrimaryButtonStyle}" />
+                <StackPanel Margin="0,14,0,0" Orientation="Horizontal">
+                    <TextBox Width="320"
+                             materialDesign:HintAssist.Hint="ابحث برقم الفاتورة أو الملاحظات"
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Margin="8,0,0,0" Command="{Binding SearchCommand}" Style="{StaticResource SecondaryButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Margin="0,0,6,0" Kind="Magnify" />
+                            <TextBlock Text="بحث" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
-            <Button Margin="8,0,0,0"
-                    Command="{Binding ViewCommand}"
-                    Content="عرض"
-                    Style="{StaticResource SecondaryButtonStyle}" />
+        <Border Grid.Row="1" Style="{StaticResource SectionCardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-            <Button Margin="8,0,0,0"
-                    Command="{Binding VoidCommand}"
-                    Content="إلغاء"
-                    Style="{StaticResource DangerButtonStyle}" />
-        </StackPanel>
+                <Grid>
+                    <DataGrid x:Name="SalesInvoicesGrid"
+                              IsReadOnly="True"
+                              ItemsSource="{Binding Invoices}"
+                              SelectedItem="{Binding SelectedInvoice}"
+                              Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="170" Binding="{Binding InvoiceNumber}" Header="الفاتورة" />
+                            <DataGridTextColumn Width="120" Binding="{Binding InvoiceDate}" Header="التاريخ" />
+                            <DataGridTextColumn Width="110" Binding="{Binding Status}" Header="الحالة" />
+                            <DataGridTextColumn Width="130" Binding="{Binding NetTotalAmount, StringFormat=N2}" Header="الصافي" />
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-        <TextBlock DockPanel.Dock="Bottom"
-                   Margin="0,12,0,0"
-                   Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
-                   Text="{Binding ErrorMessage}"
-                   TextWrapping="Wrap" />
+                    <Border IsHitTestVisible="False">
+                        <Border.Style>
+                            <Style TargetType="Border" BasedOn="{StaticResource EmptyStateCardStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=SalesInvoicesGrid, Path=Items.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="لا توجد فواتير بيع." />
+                    </Border>
+                </Grid>
 
-        <DataGrid AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  IsReadOnly="True"
-                  ItemsSource="{Binding Invoices}"
-                  SelectedItem="{Binding SelectedInvoice}"
-                  SelectionMode="Single"
-                  Style="{StaticResource ModernDataGridStyle}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Width="160"
-                                    Binding="{Binding InvoiceNumber}"
-                                    Header="رقم الفاتورة" />
-                <DataGridTextColumn Width="130"
-                                    Binding="{Binding InvoiceDate}"
-                                    Header="التاريخ" />
-                <DataGridTextColumn Width="120"
-                                    Binding="{Binding Status}"
-                                    Header="الحالة" />
-                <DataGridTextColumn Width="130"
-                                    Binding="{Binding SubtotalAmount, StringFormat=N2}"
-                                    Header="الإجمالي" />
-                <DataGridTextColumn Width="120"
-                                    Binding="{Binding DiscountAmount, StringFormat=N2}"
-                                    Header="الخصم" />
-                <DataGridTextColumn Width="140"
-                                    Binding="{Binding NetTotalAmount, StringFormat=N2}"
-                                    Header="الصافي" />
-                <DataGridTextColumn Width="2*"
-                                    Binding="{Binding Notes}"
-                                    Header="ملاحظات" />
-            </DataGrid.Columns>
-        </DataGrid>
-    </DockPanel>
+                <Border Grid.Row="1">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource ErrorBannerStyle}">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Foreground="{DynamicResource AppDangerBrush}" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

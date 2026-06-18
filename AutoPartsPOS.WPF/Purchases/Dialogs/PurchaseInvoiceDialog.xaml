@@ -3,13 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="إنشاء فاتورة شراء"
-        Width="980"
-        Height="720"
+        Width="1040"
+        Height="740"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
         FlowDirection="RightToLeft"
         Language="ar-EG"
-        Background="{DynamicResource MaterialDesignPaper}">
+        Background="{DynamicResource MaterialDesignPaper}"
+        KeyboardNavigation.TabNavigation="Cycle">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -18,133 +19,170 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock FontSize="22"
-                   FontWeight="SemiBold"
-                   Text="إنشاء فاتورة شراء" />
+        <TextBlock FontSize="24" FontWeight="SemiBold" Text="إنشاء فاتورة شراء" />
 
-        <Grid Grid.Row="1" Margin="0,18,0,12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="12" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="12" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="1" Margin="0,18,0,12" Style="{StaticResource SectionCardStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="12" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBox x:Name="InvoiceNumberTextBox"
+                         Grid.Column="0"
+                         materialDesign:HintAssist.Hint="رقم الفاتورة"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         TabIndex="0"
+                         Text="{Binding InvoiceNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+                <ComboBox Grid.Column="2"
+                          DisplayMemberPath="NameAr"
+                          ItemsSource="{Binding Suppliers}"
+                          SelectedItem="{Binding SelectedSupplier}"
+                          materialDesign:HintAssist.Hint="المورد"
+                          Style="{StaticResource ModernComboBoxStyle}"
+                          TabIndex="1" />
+                <DatePicker Grid.Column="4"
+                            SelectedDate="{Binding InvoiceDate}"
+                            materialDesign:HintAssist.Hint="التاريخ"
+                            Style="{StaticResource ModernDatePickerStyle}"
+                            TabIndex="2" />
+                <TextBox Grid.Row="2"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="5"
+                         Height="72"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         materialDesign:HintAssist.Hint="ملاحظات"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         TabIndex="3"
+                         Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="12" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="12" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBox Grid.Column="0"
-                     materialDesign:HintAssist.Hint="رقم الفاتورة"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding InvoiceNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+            <Border Style="{StaticResource SectionCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-            <ComboBox Grid.Column="2"
-                      DisplayMemberPath="NameAr"
-                      ItemsSource="{Binding Suppliers}"
-                      SelectedItem="{Binding SelectedSupplier}"
-                      materialDesign:HintAssist.Hint="المورد"
-                      Style="{StaticResource ModernComboBoxStyle}" />
+                    <ComboBox x:Name="ProductComboBox"
+                              Grid.Column="0"
+                              DisplayMemberPath="NameAr"
+                              IsEditable="True"
+                              IsTextSearchEnabled="True"
+                              ItemsSource="{Binding Products}"
+                              SelectedItem="{Binding SelectedProduct}"
+                              StaysOpenOnEdit="True"
+                              materialDesign:HintAssist.Hint="ابحث عن الصنف"
+                              Style="{StaticResource ModernComboBoxStyle}"
+                              TabIndex="4" />
+                    <TextBox x:Name="QuantityTextBox"
+                             Grid.Column="1"
+                             Margin="8,0,0,0"
+                             materialDesign:HintAssist.Hint="الكمية"
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             TabIndex="5"
+                             Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat=N3}" />
+                    <TextBox x:Name="UnitPriceTextBox"
+                             Grid.Column="2"
+                             Margin="8,0,0,0"
+                             materialDesign:HintAssist.Hint="سعر الوحدة"
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             TabIndex="6"
+                             Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
+                    <Button x:Name="AddLineButton"
+                            Grid.Column="3"
+                            Margin="8,0,0,0"
+                            Command="{Binding AddLineCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            TabIndex="7">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Margin="0,0,6,0" Kind="Plus" />
+                            <TextBlock Text="إضافة" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="4"
+                            Margin="8,0,0,0"
+                            Command="{Binding RemoveLineCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            TabIndex="8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Margin="0,0,6,0" Kind="DeleteOutline" />
+                            <TextBlock Text="حذف" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
 
-            <DatePicker Grid.Column="4"
-                        SelectedDate="{Binding InvoiceDate}"
-                        materialDesign:HintAssist.Hint="تاريخ الفاتورة"
-                        Style="{StaticResource ModernDatePickerStyle}" />
+            <Grid Grid.Row="1" Margin="0,16,0,0">
+                <DataGrid x:Name="LinesGrid"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True"
+                          ItemsSource="{Binding Lines}"
+                          SelectedItem="{Binding SelectedLine}"
+                          Style="{StaticResource ModernDataGridStyle}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="2*" Binding="{Binding Product.NameAr}" Header="الصنف" />
+                        <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=N3}" Header="الكمية" />
+                        <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=N2}" Header="سعر الوحدة" />
+                        <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=N2}" Header="الإجمالي" />
+                    </DataGrid.Columns>
+                </DataGrid>
 
-            <TextBox Grid.Row="2"
-                     Grid.Column="0"
-                     Grid.ColumnSpan="5"
-                     Height="72"
-                     AcceptsReturn="True"
-                     materialDesign:HintAssist.Hint="ملاحظات"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" />
-
-            <ComboBox Grid.Row="4"
-                      Grid.Column="0"
-                      DisplayMemberPath="NameAr"
-                      ItemsSource="{Binding Products}"
-                      SelectedItem="{Binding SelectedProduct}"
-                      materialDesign:HintAssist.Hint="المنتج"
-                      Style="{StaticResource ModernComboBoxStyle}" />
-
-            <TextBox Grid.Row="4"
-                     Grid.Column="2"
-                     materialDesign:HintAssist.Hint="الكمية"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat=N3}" />
-
-            <StackPanel Grid.Row="4"
-                        Grid.Column="4"
-                        Orientation="Horizontal">
-                <TextBox Width="160"
-                         materialDesign:HintAssist.Hint="سعر الوحدة"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                         Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
-
-                <Button Margin="8,0,0,0"
-                        Command="{Binding AddLineCommand}"
-                        Content="إضافة"
-                    Style="{StaticResource PrimaryButtonStyle}" />
-
-                <Button Margin="8,0,0,0"
-                        Command="{Binding RemoveLineCommand}"
-                        Content="حذف"
-                    Style="{StaticResource SecondaryButtonStyle}" />
-            </StackPanel>
+                <Border IsHitTestVisible="False">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource EmptyStateCardStyle}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=LinesGrid, Path=Items.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="لا توجد أصناف." />
+                </Border>
+            </Grid>
         </Grid>
-
-        <DataGrid Grid.Row="2"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  IsReadOnly="True"
-                  ItemsSource="{Binding Lines}"
-                  SelectedItem="{Binding SelectedLine}"
-                  SelectionMode="Single"
-                  Style="{StaticResource ModernDataGridStyle}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Width="2*"
-                                    Binding="{Binding Product.NameAr}"
-                                    Header="المنتج" />
-                <DataGridTextColumn Width="120"
-                                    Binding="{Binding Quantity, StringFormat=N3}"
-                                    Header="الكمية" />
-                <DataGridTextColumn Width="120"
-                                    Binding="{Binding UnitPrice, StringFormat=N2}"
-                                    Header="سعر الوحدة" />
-                <DataGridTextColumn Width="140"
-                                    Binding="{Binding TotalPrice, StringFormat=N2}"
-                                    Header="الإجمالي" />
-            </DataGrid.Columns>
-        </DataGrid>
 
         <DockPanel Grid.Row="3" Margin="0,16,0,0">
             <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                <Button Command="{Binding SaveCommand}"
-                        Content="حفظ وترحيل"
-                        IsDefault="True"
-                    Style="{StaticResource PrimaryButtonStyle}" />
-                <Button Margin="8,0,0,0"
-                        Command="{Binding CancelCommand}"
-                        Content="إلغاء"
-                        IsCancel="True"
-                    Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Command="{Binding SaveCommand}" IsDefault="True" Style="{StaticResource PrimaryButtonStyle}" TabIndex="9">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Margin="0,0,6,0" Kind="ContentSaveOutline" />
+                        <TextBlock Text="حفظ" />
+                    </StackPanel>
+                </Button>
+                <Button Margin="8,0,0,0" Command="{Binding CancelCommand}" IsCancel="True" Style="{StaticResource SecondaryButtonStyle}" TabIndex="10">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Margin="0,0,6,0" Kind="Close" />
+                        <TextBlock Text="إلغاء" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
 
             <StackPanel>
-                <TextBlock HorizontalAlignment="Right"
-                           FontSize="18"
-                           FontWeight="SemiBold"
-                           Text="{Binding InvoiceTotal, StringFormat=الإجمالي: {0:N2}}" />
-                <TextBlock Margin="0,8,0,0"
-                           Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
-                           Text="{Binding ErrorMessage}"
-                           TextWrapping="Wrap" />
+                <TextBlock HorizontalAlignment="Right" FontSize="18" FontWeight="SemiBold" Text="{Binding InvoiceTotal, StringFormat=الإجمالي: {0:N2}}" />
+                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource MaterialDesignValidationErrorBrush}" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
             </StackPanel>
         </DockPanel>
     </Grid>

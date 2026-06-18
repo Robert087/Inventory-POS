@@ -36,6 +36,16 @@ public sealed class SalesInvoiceItemConfiguration : IEntityTypeConfiguration<Sal
             .HasPrecision(14, 2)
             .IsRequired();
 
+        builder.Property(item => item.UnitCost)
+            .HasColumnName("unit_cost")
+            .HasPrecision(14, 4)
+            .IsRequired();
+
+        builder.Property(item => item.TotalCost)
+            .HasColumnName("total_cost")
+            .HasPrecision(14, 2)
+            .IsRequired();
+
         builder.HasOne(item => item.Product)
             .WithMany()
             .HasForeignKey(item => item.ProductId)
@@ -52,6 +62,8 @@ public sealed class SalesInvoiceItemConfiguration : IEntityTypeConfiguration<Sal
             table.HasCheckConstraint("ck_sales_invoice_items_quantity_positive", "quantity > 0");
             table.HasCheckConstraint("ck_sales_invoice_items_unit_price_non_negative", "unit_price >= 0");
             table.HasCheckConstraint("ck_sales_invoice_items_total_price_non_negative", "total_price >= 0");
+            table.HasCheckConstraint("ck_sales_invoice_items_unit_cost_non_negative", "unit_cost >= 0");
+            table.HasCheckConstraint("ck_sales_invoice_items_total_cost_non_negative", "total_cost >= 0");
         });
     }
 }

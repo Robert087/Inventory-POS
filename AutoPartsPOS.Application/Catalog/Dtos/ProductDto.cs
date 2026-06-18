@@ -8,6 +8,7 @@ public sealed record ProductDto(
     long CategoryId,
     string CategoryNameAr,
     decimal PurchasePrice,
+    decimal CurrentAverageCost,
     decimal SellingPrice,
     decimal CurrentStock,
     decimal MinimumStock,

@@ -2,18 +2,26 @@ using AutoPartsPOS.Application.Analytics.Dtos;
 using AutoPartsPOS.Application.Common.ViewModels;
 using AutoPartsPOS.Application.Dashboard.Interfaces;
 using AutoPartsPOS.Application.Insights.Dtos;
+using AutoPartsPOS.Application.Purchases.Dtos;
+using AutoPartsPOS.Application.Purchases.Interfaces;
+using AutoPartsPOS.Application.Sales.Dtos;
+using AutoPartsPOS.Application.Sales.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 
 namespace AutoPartsPOS.WPF.ViewModels;
 
-public sealed partial class HomeViewModel(IDashboardService dashboardService) : ViewModelBase
+public sealed partial class HomeViewModel(
+    IDashboardService dashboardService,
+    ISalesInvoiceService salesInvoiceService,
+    IPurchaseInvoiceService purchaseInvoiceService) : ViewModelBase
 {
     public ObservableCollection<TopSellingProductDto> TopSellingProducts { get; } = [];
     public ObservableCollection<LowStockInsightDto> LowStockProducts { get; } = [];
     public ObservableCollection<SlowMovingProductDto> SlowMovingProducts { get; } = [];
-    public ObservableCollection<ReorderSuggestionDto> ReorderSuggestions { get; } = [];
+    public ObservableCollection<SalesInvoiceListDto> RecentSales { get; } = [];
+    public ObservableCollection<PurchaseInvoiceListDto> RecentPurchases { get; } = [];
 
     [ObservableProperty] private decimal _todaySales;
     [ObservableProperty] private decimal _currentMonthSales;
@@ -42,10 +50,15 @@ public sealed partial class HomeViewModel(IDashboardService dashboardService) : 
                 InvoiceCount = dashboard.InvoiceCount;
                 InventoryValue = dashboard.InventoryValue;
                 LowStockCount = dashboard.LowStockCount;
+
                 Replace(TopSellingProducts, dashboard.TopSellingProducts);
                 Replace(LowStockProducts, dashboard.LowStockProducts);
                 Replace(SlowMovingProducts, dashboard.SlowMovingProducts);
-                Replace(ReorderSuggestions, dashboard.ReorderSuggestions);
+
+                var recentSales = (await salesInvoiceService.SearchAsync(null, token)).Take(5);
+                var recentPurchases = (await purchaseInvoiceService.SearchAsync(null, token)).Take(5);
+                Replace(RecentSales, recentSales);
+                Replace(RecentPurchases, recentPurchases);
             }, cancellationToken);
         }
         catch (Exception exception)
@@ -57,6 +70,9 @@ public sealed partial class HomeViewModel(IDashboardService dashboardService) : 
     private static void Replace<T>(ObservableCollection<T> collection, IEnumerable<T> values)
     {
         collection.Clear();
-        foreach (var value in values) collection.Add(value);
+        foreach (var value in values)
+        {
+            collection.Add(value);
+        }
     }
 }

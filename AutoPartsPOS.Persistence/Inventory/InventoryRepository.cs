@@ -1,4 +1,4 @@
-﻿using AutoPartsPOS.Application.Inventory.Dtos;
+using AutoPartsPOS.Application.Inventory.Dtos;
 using AutoPartsPOS.Application.Inventory.Interfaces;
 using AutoPartsPOS.Domain.Catalog;
 using AutoPartsPOS.Domain.Inventory;
@@ -83,11 +83,11 @@ public sealed class InventoryRepository(AppDbContext dbContext) : IInventoryRepo
     {
         return transactionType switch
         {
-            InventoryTransactionType.Purchase => "Ø´Ø±Ø§Ø¡",
-            InventoryTransactionType.Sale => "Ø¨ÙŠØ¹",
-            InventoryTransactionType.Adjustment => "ØªØ³ÙˆÙŠØ©",
-            InventoryTransactionType.VoidPurchase => "Ø¥Ù„ØºØ§Ø¡ Ø´Ø±Ø§Ø¡",
-            InventoryTransactionType.VoidSale => "Ø¥Ù„ØºØ§Ø¡ Ø¨ÙŠØ¹",
+            InventoryTransactionType.Purchase => "شراء",
+            InventoryTransactionType.Sale => "بيع",
+            InventoryTransactionType.Adjustment => "تسوية",
+            InventoryTransactionType.VoidPurchase => "إلغاء شراء",
+            InventoryTransactionType.VoidSale => "إلغاء بيع",
             _ => transactionType.ToString()
         };
     }
@@ -96,9 +96,9 @@ public sealed class InventoryRepository(AppDbContext dbContext) : IInventoryRepo
     {
         return referenceType switch
         {
-            InventoryReferenceType.PurchaseInvoice => "ÙØ§ØªÙˆØ±Ø© Ø´Ø±Ø§Ø¡",
-            InventoryReferenceType.SalesInvoice => "ÙØ§ØªÙˆØ±Ø© Ø¨ÙŠØ¹",
-            InventoryReferenceType.ManualAdjustment => "ØªØ³ÙˆÙŠØ© ÙŠØ¯ÙˆÙŠØ©",
+            InventoryReferenceType.PurchaseInvoice => "فاتورة شراء",
+            InventoryReferenceType.SalesInvoice => "فاتورة بيع",
+            InventoryReferenceType.ManualAdjustment => "تسوية يدوية",
             _ => referenceType.ToString()
         };
     }
@@ -123,4 +123,3 @@ public sealed class InventoryRepository(AppDbContext dbContext) : IInventoryRepo
         return transaction.ReferenceId.ToString();
     }
 }
-

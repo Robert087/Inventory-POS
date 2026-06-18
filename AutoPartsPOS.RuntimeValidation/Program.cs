@@ -43,6 +43,7 @@ internal static class Program
             NameAr = "منتج اختبار",
             SellingPrice = 20,
             PurchasePrice = 10,
+            CurrentAverageCost = 10,
             CurrentStock = 0,
             MinimumStock = 2,
             IsActive = true
@@ -74,6 +75,7 @@ internal static class Program
         });
         Assert(purchaseResult.Succeeded, "Purchase invoice creation failed.");
         Assert(product.CurrentStock == 10, "Purchase did not increase stock.");
+        Assert(product.CurrentAverageCost == 10, "Purchase did not set weighted average cost.");
         Assert(inventoryRepository.Transactions.Any(item => item.TransactionType == InventoryTransactionType.Purchase && item.Quantity == 10), "Purchase ledger entry missing.");
 
         var salesService = new SalesInvoiceService(salesRepository, inventoryRepository, clock, unitOfWork);
@@ -86,6 +88,8 @@ internal static class Program
         });
         Assert(salesResult.Succeeded, "Sales invoice creation failed.");
         Assert(product.CurrentStock == 6, "Sale did not decrease stock.");
+        Assert(salesRepository.Invoices.Single().Items.Single().UnitCost == 10, "Sale did not store WAC unit cost snapshot.");
+        Assert(salesRepository.Invoices.Single().Items.Single().TotalCost == 40, "Sale did not store WAC total cost snapshot.");
         Assert(inventoryRepository.Transactions.Any(item => item.TransactionType == InventoryTransactionType.Sale && item.Quantity == -4), "Sale ledger entry missing.");
 
         var oversellResult = await salesService.CreateAsync(new CreateSalesInvoiceDto
@@ -119,7 +123,7 @@ internal static class Program
         var excelPath = Path.Combine(exportDirectory, "inventory-report.xlsx");
         var inventoryReport = new InventoryReportDto(10, 100, 1,
         [
-            new InventoryReportItemDto(product.Id, product.ProductCode, product.NameAr, product.CurrentStock, product.PurchasePrice, product.CurrentStock * product.PurchasePrice, product.MinimumStock, true)
+            new InventoryReportItemDto(product.Id, product.ProductCode, product.NameAr, product.CurrentStock, product.CurrentAverageCost, product.CurrentStock * product.CurrentAverageCost, product.MinimumStock, true)
         ]);
         await exportService.ExportInventoryReportToPdfAsync(inventoryReport, pdfPath);
         await exportService.ExportInventoryReportToExcelAsync(inventoryReport, excelPath);
@@ -300,7 +304,7 @@ internal static class Program
 
         private static SalesInvoiceDetailsDto ToDetailsDto(SalesInvoice invoice) =>
             new(invoice.Id, invoice.InvoiceNumber, invoice.InvoiceDate, invoice.Status.ToString(), invoice.SubtotalAmount, invoice.DiscountAmount, invoice.NetTotalAmount, invoice.Notes,
-                invoice.Items.Select(item => new SalesInvoiceItemDto(item.Id, item.ProductId, "منتج اختبار", item.Quantity, item.UnitPrice, item.TotalPrice)).ToList());
+                invoice.Items.Select(item => new SalesInvoiceItemDto(item.Id, item.ProductId, "منتج اختبار", item.Quantity, item.UnitPrice, item.TotalPrice, item.UnitCost, item.TotalCost)).ToList());
     }
 
     private sealed class FakeApplicationSettingsService : IApplicationSettingsService

@@ -41,6 +41,11 @@ namespace AutoPartsPOS.Persistence.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("created_by");
 
+                    b.Property<decimal>("CurrentAverageCost")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("current_average_cost");
+
                     b.Property<decimal>("CurrentStock")
                         .HasPrecision(14, 3)
                         .HasColumnType("TEXT")
@@ -110,6 +115,8 @@ namespace AutoPartsPOS.Persistence.Migrations
 
                     b.ToTable("products", null, t =>
                         {
+                            t.HasCheckConstraint("ck_products_current_average_cost_non_negative", "current_average_cost >= 0");
+
                             t.HasCheckConstraint("ck_products_current_stock_non_negative", "current_stock >= 0");
 
                             t.HasCheckConstraint("ck_products_minimum_stock_non_negative", "minimum_stock >= 0");
@@ -478,10 +485,20 @@ namespace AutoPartsPOS.Persistence.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("sales_invoice_id");
 
+                    b.Property<decimal>("TotalCost")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("total_cost");
+
                     b.Property<decimal>("TotalPrice")
                         .HasPrecision(14, 2)
                         .HasColumnType("TEXT")
                         .HasColumnName("total_price");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("unit_cost");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(14, 2)
@@ -500,7 +517,11 @@ namespace AutoPartsPOS.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_sales_invoice_items_quantity_positive", "quantity > 0");
 
+                            t.HasCheckConstraint("ck_sales_invoice_items_total_cost_non_negative", "total_cost >= 0");
+
                             t.HasCheckConstraint("ck_sales_invoice_items_total_price_non_negative", "total_price >= 0");
+
+                            t.HasCheckConstraint("ck_sales_invoice_items_unit_cost_non_negative", "unit_cost >= 0");
 
                             t.HasCheckConstraint("ck_sales_invoice_items_unit_price_non_negative", "unit_price >= 0");
                         });

@@ -4,100 +4,120 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              FlowDirection="RightToLeft"
              Language="ar-EG">
-    <DockPanel>
-        <WrapPanel DockPanel.Dock="Top"
-                   Margin="0,0,0,16"
-                   VerticalAlignment="Center">
-            <TextBox Width="320"
-                     Margin="0,0,0,8"
-                     materialDesign:HintAssist.Hint="بحث بالكود أو الاسم أو الباركود"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <ComboBox Width="220"
-                      Margin="8,0,0,8"
-                      DisplayMemberPath="NameAr"
-                      ItemsSource="{Binding Categories}"
-                      SelectedItem="{Binding SelectedCategory}"
-                      Style="{StaticResource ModernComboBoxStyle}" />
+        <Border Grid.Row="0" Style="{StaticResource ToolbarCardStyle}">
+            <StackPanel>
+                <Grid FlowDirection="LeftToRight">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding AddCommand}" Style="{StaticResource PrimaryButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="Plus" />
+                                <TextBlock Text="إضافة" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="8,0,0,0" Command="{Binding EditCommand}" Style="{StaticResource SecondaryButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="PencilOutline" />
+                                <TextBlock Text="تعديل" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="8,0,0,0" Command="{Binding DeactivateCommand}" Style="{StaticResource DangerButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="BlockHelper" />
+                                <TextBlock Text="تعطيل" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource PageTitleStyle}" Text="الأصناف" />
+                </Grid>
 
-            <Button Margin="8,0,0,8"
-                    Command="{Binding SearchCommand}"
-                    Content="بحث"
-                    Style="{StaticResource PrimaryButtonStyle}" />
+                <WrapPanel Margin="0,14,0,0">
+                    <TextBox Width="320"
+                             materialDesign:HintAssist.Hint="ابحث بالكود أو الاسم أو الباركود"
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                    <ComboBox Width="220"
+                              Margin="8,0,0,0"
+                              DisplayMemberPath="NameAr"
+                              ItemsSource="{Binding Categories}"
+                              SelectedItem="{Binding SelectedCategory}"
+                              Style="{StaticResource ModernComboBoxStyle}" />
+                    <Button Margin="8,0,0,0" Command="{Binding SearchCommand}" Style="{StaticResource SecondaryButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Margin="0,0,6,0" Kind="Magnify" />
+                            <TextBlock Text="بحث" />
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
 
-            <Button Margin="8,0,0,8"
-                    Command="{Binding AddCommand}"
-                    Content="إضافة"
-                    Style="{StaticResource PrimaryButtonStyle}" />
+        <Border Grid.Row="1" Style="{StaticResource SectionCardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-            <Button Margin="8,0,0,8"
-                    Command="{Binding EditCommand}"
-                    Content="تعديل"
-                    Style="{StaticResource SecondaryButtonStyle}" />
+                <Grid>
+                    <DataGrid x:Name="ProductsGrid"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              ItemsSource="{Binding Products}"
+                              SelectedItem="{Binding SelectedProduct}"
+                              Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="130" Binding="{Binding ProductCode}" Header="الكود" />
+                            <DataGridTextColumn Width="2*" Binding="{Binding NameAr}" Header="الصنف" />
+                            <DataGridTextColumn Width="160" Binding="{Binding CategoryNameAr}" Header="التصنيف" />
+                            <DataGridTextColumn Width="120" Binding="{Binding SellingPrice, StringFormat=N2}" Header="سعر البيع" />
+                            <DataGridTextColumn Width="120" Binding="{Binding CurrentStock, StringFormat=N3}" Header="الرصيد" />
+                            <DataGridCheckBoxColumn Width="80" Binding="{Binding IsActive}" Header="نشط" />
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-            <Button Margin="8,0,0,8"
-                    Command="{Binding DeactivateCommand}"
-                    Content="تعطيل"
-                    Style="{StaticResource DangerButtonStyle}" />
-        </WrapPanel>
+                    <Border IsHitTestVisible="False">
+                        <Border.Style>
+                            <Style TargetType="Border" BasedOn="{StaticResource EmptyStateCardStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ProductsGrid, Path=Items.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="لا توجد أصناف." />
+                    </Border>
+                </Grid>
 
-        <TextBlock DockPanel.Dock="Bottom"
-                   Margin="0,12,0,0"
-                   Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
-                   Text="{Binding ErrorMessage}"
-                   TextWrapping="Wrap" />
-
-        <DataGrid AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  IsReadOnly="True"
-                  ItemsSource="{Binding Products}"
-                  SelectedItem="{Binding SelectedProduct}"
-                  SelectionMode="Single"
-                  Style="{StaticResource ModernDataGridStyle}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Width="130"
-                                    Binding="{Binding ProductCode}"
-                                    Header="الكود" />
-                <DataGridTextColumn Width="140"
-                                    Binding="{Binding Barcode}"
-                                    Header="الباركود" />
-                <DataGridTextColumn Width="2*"
-                                    Binding="{Binding NameAr}"
-                                    Header="اسم المنتج" />
-                <DataGridTextColumn Width="160"
-                                    Binding="{Binding CategoryNameAr}"
-                                    Header="التصنيف" />
-                <DataGridTextColumn Width="120"
-                                    Binding="{Binding PurchasePrice, StringFormat=N2}"
-                                    Header="سعر الشراء" />
-                <DataGridTextColumn Width="120"
-                                    Binding="{Binding SellingPrice, StringFormat=N2}"
-                                    Header="سعر البيع" />
-                <DataGridTextColumn Width="110"
-                                    Binding="{Binding CurrentStock, StringFormat=N3}"
-                                    Header="المخزون" />
-                <DataGridTextColumn Width="110"
-                                    Binding="{Binding MinimumStock, StringFormat=N3}"
-                                    Header="الحد الأدنى" />
-                <DataGridTemplateColumn Width="130" Header="الحالة">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border Padding="8,3"
-                                    CornerRadius="4"
-                                    Background="{Binding Converter={StaticResource StockStatusBrushConverter}}">
-                                <TextBlock HorizontalAlignment="Center"
-                                           Foreground="White"
-                                           Text="{Binding Converter={StaticResource StockStatusTextConverter}}" />
-                            </Border>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridCheckBoxColumn Width="80"
-                                        Binding="{Binding IsActive}"
-                                        Header="نشط" />
-            </DataGrid.Columns>
-        </DataGrid>
-    </DockPanel>
+                <Border Grid.Row="1">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource ErrorBannerStyle}">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Foreground="{DynamicResource AppDangerBrush}" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

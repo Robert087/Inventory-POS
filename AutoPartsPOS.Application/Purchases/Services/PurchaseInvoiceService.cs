@@ -64,6 +64,13 @@ public sealed class PurchaseInvoiceService(
                 var product = await inventoryRepository.GetProductForUpdateAsync(item.ProductId, token)
                     ?? throw new InvalidOperationException("Product disappeared while posting purchase invoice.");
 
+                var oldStock = product.CurrentStock;
+                product.CurrentAverageCost = CalculateWeightedAverageCost(
+                    oldStock,
+                    product.CurrentAverageCost,
+                    item.Quantity,
+                    item.UnitPrice);
+                product.PurchasePrice = item.UnitPrice;
                 product.CurrentStock += item.Quantity;
 
                 await inventoryRepository.AddTransactionAsync(new InventoryTransaction
@@ -142,6 +149,11 @@ public sealed class PurchaseInvoiceService(
                     throw new InvalidOperationException("Voiding purchase invoice would create negative stock.");
                 }
 
+                product.CurrentAverageCost = CalculateAverageCostAfterPurchaseReversal(
+                    product.CurrentStock,
+                    product.CurrentAverageCost,
+                    item.Quantity,
+                    item.UnitPrice);
                 product.CurrentStock -= item.Quantity;
 
                 await inventoryRepository.AddTransactionAsync(new InventoryTransaction
@@ -161,6 +173,42 @@ public sealed class PurchaseInvoiceService(
         }, cancellationToken);
 
         return OperationResult.Success();
+    }
+
+    private static decimal CalculateWeightedAverageCost(decimal currentStock, decimal currentAverageCost, decimal purchaseQuantity, decimal purchaseUnitCost)
+    {
+        var newStock = currentStock + purchaseQuantity;
+
+        if (newStock <= 0)
+        {
+            return 0;
+        }
+
+        var currentValue = currentStock * currentAverageCost;
+        var purchaseValue = purchaseQuantity * purchaseUnitCost;
+
+        return decimal.Round((currentValue + purchaseValue) / newStock, 4);
+    }
+
+    private static decimal CalculateAverageCostAfterPurchaseReversal(decimal currentStock, decimal currentAverageCost, decimal purchaseQuantity, decimal purchaseUnitCost)
+    {
+        var newStock = currentStock - purchaseQuantity;
+
+        if (newStock <= 0)
+        {
+            return 0;
+        }
+
+        var currentValue = currentStock * currentAverageCost;
+        var reversedValue = purchaseQuantity * purchaseUnitCost;
+        var remainingValue = currentValue - reversedValue;
+
+        if (remainingValue < 0)
+        {
+            throw new InvalidOperationException("Voiding purchase invoice would create negative inventory value.");
+        }
+
+        return decimal.Round(remainingValue / newStock, 4);
     }
 
     private async Task<Dictionary<string, List<string>>> ValidateCreateAsync(CreatePurchaseInvoiceDto dto, CancellationToken cancellationToken)

@@ -5,7 +5,7 @@ public sealed record InventoryReportItemDto(
     string ProductCode,
     string ProductNameAr,
     decimal CurrentStock,
-    decimal PurchasePrice,
+    decimal CurrentAverageCost,
     decimal InventoryValue,
     decimal MinimumStock,
     bool IsLowStock);

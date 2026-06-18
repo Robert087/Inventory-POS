@@ -16,6 +16,8 @@ public sealed class Product : AuditableEntity
 
     public decimal PurchasePrice { get; set; }
 
+    public decimal CurrentAverageCost { get; set; }
+
     public decimal SellingPrice { get; set; }
 
     public decimal CurrentStock { get; set; }

@@ -108,6 +108,6 @@ public sealed partial class PurchaseInvoicesViewModel(
 
     private bool CanVoidSelectedInvoice()
     {
-        return SelectedInvoice?.Status == "مرحلة";
+        return SelectedInvoice?.Status == "مُرحّلة";
     }
 }

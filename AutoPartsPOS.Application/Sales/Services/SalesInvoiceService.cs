@@ -36,6 +36,8 @@ public sealed class SalesInvoiceService(
 
         await unitOfWork.ExecuteInTransactionAsync(async token =>
         {
+            var costSnapshots = new Dictionary<long, decimal>();
+
             foreach (var groupedItem in dto.Items.GroupBy(item => item.ProductId))
             {
                 var product = await inventoryRepository.GetProductForUpdateAsync(groupedItem.Key, token)
@@ -46,6 +48,8 @@ public sealed class SalesInvoiceService(
                 {
                     throw new InvalidOperationException($"Cannot sell more than available stock for product {product.NameAr}.");
                 }
+
+                costSnapshots[product.Id] = product.CurrentAverageCost;
             }
 
             var invoice = new SalesInvoice
@@ -60,7 +64,9 @@ public sealed class SalesInvoiceService(
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
                     UnitPrice = item.UnitPrice,
-                    TotalPrice = decimal.Round(item.Quantity * item.UnitPrice, 2)
+                    TotalPrice = decimal.Round(item.Quantity * item.UnitPrice, 2),
+                    UnitCost = costSnapshots[item.ProductId],
+                    TotalCost = decimal.Round(item.Quantity * costSnapshots[item.ProductId], 2)
                 }).ToList()
             };
 

@@ -40,63 +40,50 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBox Grid.Row="0"
-                     Grid.Column="0"
-                     materialDesign:HintAssist.Hint="كود المنتج"
-                         Style="{StaticResource ModernTextBoxStyle}"
+            <TextBox Grid.Row="0" Grid.Column="0"
+                     materialDesign:HintAssist.Hint="كود الصنف"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding ProductCode, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
 
-            <TextBox Grid.Row="0"
-                     Grid.Column="2"
+            <TextBox Grid.Row="0" Grid.Column="2"
                      materialDesign:HintAssist.Hint="الباركود"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}" />
 
-            <TextBox Grid.Row="2"
-                     Grid.Column="0"
-                     Grid.ColumnSpan="3"
-                     materialDesign:HintAssist.Hint="اسم المنتج"
-                         Style="{StaticResource ModernTextBoxStyle}"
+            <TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                     materialDesign:HintAssist.Hint="اسم الصنف"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding NameAr, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
 
-            <ComboBox Grid.Row="4"
-                      Grid.Column="0"
-                      Grid.ColumnSpan="3"
+            <ComboBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
                       DisplayMemberPath="NameAr"
                       ItemsSource="{Binding Categories}"
                       SelectedValue="{Binding CategoryId, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                       SelectedValuePath="Id"
                       materialDesign:HintAssist.Hint="التصنيف"
-                          Style="{StaticResource ModernComboBoxStyle}" />
+                      Style="{StaticResource ModernComboBoxStyle}" />
 
-            <TextBox Grid.Row="6"
-                     Grid.Column="0"
+            <TextBox Grid.Row="6" Grid.Column="0"
                      materialDesign:HintAssist.Hint="سعر الشراء"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding PurchasePrice, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N2}" />
 
-            <TextBox Grid.Row="6"
-                     Grid.Column="2"
+            <TextBox Grid.Row="6" Grid.Column="2"
                      materialDesign:HintAssist.Hint="سعر البيع"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding SellingPrice, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N2}" />
 
-            <TextBox Grid.Row="8"
-                     Grid.Column="0"
+            <TextBox Grid.Row="8" Grid.Column="0"
                      materialDesign:HintAssist.Hint="المخزون الحالي"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding CurrentStock, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N3}" />
 
-            <TextBox Grid.Row="8"
-                     Grid.Column="2"
+            <TextBox Grid.Row="8" Grid.Column="2"
                      materialDesign:HintAssist.Hint="الحد الأدنى للمخزون"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding MinimumStock, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N3}" />
 
-            <StackPanel Grid.Row="9"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="3"
-                        Margin="0,14,0,0">
+            <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,14,0,0">
                 <CheckBox Content="نشط"
                           IsChecked="{Binding IsActive}"
                           Style="{StaticResource MaterialDesignCheckBox}" />
@@ -108,18 +95,9 @@
             </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="2"
-                    HorizontalAlignment="Left"
-                    Orientation="Horizontal">
-            <Button Command="{Binding SaveCommand}"
-                    Content="حفظ"
-                    IsDefault="True"
-                        Style="{StaticResource PrimaryButtonStyle}" />
-            <Button Margin="8,0,0,0"
-                    Command="{Binding CancelCommand}"
-                    Content="إلغاء"
-                    IsCancel="True"
-                        Style="{StaticResource SecondaryButtonStyle}" />
+        <StackPanel Grid.Row="2" HorizontalAlignment="Left" Orientation="Horizontal">
+            <Button Command="{Binding SaveCommand}" Content="حفظ" IsDefault="True" Style="{StaticResource PrimaryButtonStyle}" />
+            <Button Margin="8,0,0,0" Command="{Binding CancelCommand}" Content="إلغاء" IsCancel="True" Style="{StaticResource SecondaryButtonStyle}" />
         </StackPanel>
     </Grid>
 </Window>

@@ -37,6 +37,11 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasPrecision(14, 2)
             .IsRequired();
 
+        builder.Property(product => product.CurrentAverageCost)
+            .HasColumnName("current_average_cost")
+            .HasPrecision(14, 4)
+            .IsRequired();
+
         builder.Property(product => product.SellingPrice)
             .HasColumnName("selling_price")
             .HasPrecision(14, 2)
@@ -97,6 +102,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.ToTable(table =>
         {
             table.HasCheckConstraint("ck_products_purchase_price_non_negative", "purchase_price >= 0");
+            table.HasCheckConstraint("ck_products_current_average_cost_non_negative", "current_average_cost >= 0");
             table.HasCheckConstraint("ck_products_selling_price_non_negative", "selling_price >= 0");
             table.HasCheckConstraint("ck_products_current_stock_non_negative", "current_stock >= 0");
             table.HasCheckConstraint("ck_products_minimum_stock_non_negative", "minimum_stock >= 0");

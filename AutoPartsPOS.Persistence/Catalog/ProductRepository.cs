@@ -39,6 +39,7 @@ public sealed class ProductRepository(AppDbContext dbContext) : IProductReposito
                 product.CategoryId,
                 product.Category == null ? string.Empty : product.Category.NameAr,
                 product.PurchasePrice,
+                product.CurrentAverageCost,
                 product.SellingPrice,
                 product.CurrentStock,
                 product.MinimumStock,

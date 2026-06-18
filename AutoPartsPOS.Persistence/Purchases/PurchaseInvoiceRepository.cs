@@ -1,4 +1,4 @@
-﻿using AutoPartsPOS.Application.Purchases.Dtos;
+using AutoPartsPOS.Application.Purchases.Dtos;
 using AutoPartsPOS.Application.Purchases.Interfaces;
 using AutoPartsPOS.Domain.Purchases;
 using Microsoft.EntityFrameworkCore;
@@ -98,10 +98,9 @@ public sealed class PurchaseInvoiceRepository(AppDbContext dbContext) : IPurchas
     {
         return status switch
         {
-            PurchaseInvoiceStatus.Posted => "Ù…Ø±Ø­Ù„Ø©",
-            PurchaseInvoiceStatus.Voided => "Ù…Ù„ØºØ§Ø©",
+            PurchaseInvoiceStatus.Posted => "مُرحّلة",
+            PurchaseInvoiceStatus.Voided => "ملغاة",
             _ => status.ToString()
         };
     }
 }
-

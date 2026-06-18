@@ -23,26 +23,28 @@
 
         <StackPanel Grid.Row="1" Margin="0,24,0,0">
             <TextBox materialDesign:HintAssist.Hint="اسم المورد"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding NameAr, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
 
             <TextBox Margin="0,14,0,0"
                      materialDesign:HintAssist.Hint="الهاتف"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBox Margin="0,14,0,0"
                      Height="80"
                      AcceptsReturn="True"
+                     TextWrapping="Wrap"
                      materialDesign:HintAssist.Hint="العنوان"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBox Margin="0,14,0,0"
                      Height="80"
                      AcceptsReturn="True"
+                     TextWrapping="Wrap"
                      materialDesign:HintAssist.Hint="ملاحظات"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" />
 
             <CheckBox Margin="0,14,0,0"
@@ -56,18 +58,9 @@
                        TextWrapping="Wrap" />
         </StackPanel>
 
-        <StackPanel Grid.Row="2"
-                    HorizontalAlignment="Left"
-                    Orientation="Horizontal">
-            <Button Command="{Binding SaveCommand}"
-                    Content="حفظ"
-                    IsDefault="True"
-                        Style="{StaticResource PrimaryButtonStyle}" />
-            <Button Margin="8,0,0,0"
-                    Command="{Binding CancelCommand}"
-                    Content="إلغاء"
-                    IsCancel="True"
-                        Style="{StaticResource SecondaryButtonStyle}" />
+        <StackPanel Grid.Row="2" HorizontalAlignment="Left" Orientation="Horizontal">
+            <Button Command="{Binding SaveCommand}" Content="حفظ" IsDefault="True" Style="{StaticResource PrimaryButtonStyle}" />
+            <Button Margin="8,0,0,0" Command="{Binding CancelCommand}" Content="إلغاء" IsCancel="True" Style="{StaticResource SecondaryButtonStyle}" />
         </StackPanel>
     </Grid>
 </Window>

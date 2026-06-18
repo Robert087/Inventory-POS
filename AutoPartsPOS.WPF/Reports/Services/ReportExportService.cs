@@ -116,7 +116,7 @@ public sealed class ReportExportService : IReportExportService
             sheet.Cell(row, 1).Value = item.ProductCode;
             sheet.Cell(row, 2).Value = item.ProductNameAr;
             sheet.Cell(row, 3).Value = item.CurrentStock;
-            sheet.Cell(row, 4).Value = item.PurchasePrice;
+            sheet.Cell(row, 4).Value = item.CurrentAverageCost;
             sheet.Cell(row, 5).Value = item.InventoryValue;
             sheet.Cell(row, 6).Value = item.MinimumStock;
             sheet.Cell(row, 7).Value = item.IsLowStock ? "نعم" : "لا";

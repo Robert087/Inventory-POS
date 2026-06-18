@@ -18,4 +18,8 @@ public sealed class SalesInvoiceItem : Entity
     public decimal UnitPrice { get; set; }
 
     public decimal TotalPrice { get; set; }
+
+    public decimal UnitCost { get; set; }
+
+    public decimal TotalCost { get; set; }
 }

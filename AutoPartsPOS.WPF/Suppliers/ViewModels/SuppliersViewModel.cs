@@ -24,7 +24,7 @@ public sealed partial class SuppliersViewModel(
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        Title = "الموردين";
+        Title = "الموردون";
         await LoadAsync(cancellationToken);
     }
 
