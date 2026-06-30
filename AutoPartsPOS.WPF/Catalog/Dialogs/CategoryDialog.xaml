@@ -34,11 +34,6 @@
                      Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
 
-            <CheckBox Margin="0,14,0,0"
-                      Content="نشط"
-                      IsChecked="{Binding IsActive}"
-                      Style="{StaticResource MaterialDesignCheckBox}" />
-
             <TextBlock Margin="0,12,0,0"
                        Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
                        Text="{Binding ErrorMessage}"

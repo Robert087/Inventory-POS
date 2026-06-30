@@ -138,20 +138,36 @@ public sealed class ProductService(
         {
             AddError(errors, nameof(SaveProductDto.PurchasePrice), "سعر الشراء لا يمكن أن يكون أقل من صفر.");
         }
+        else if (dto.PurchasePrice != decimal.Truncate(dto.PurchasePrice))
+        {
+            AddError(errors, nameof(SaveProductDto.PurchasePrice), "سعر الشراء يجب أن يكون عدداً صحيحاً.");
+        }
 
         if (dto.SellingPrice < 0)
         {
             AddError(errors, nameof(SaveProductDto.SellingPrice), "سعر البيع لا يمكن أن يكون أقل من صفر.");
+        }
+        else if (dto.SellingPrice != decimal.Truncate(dto.SellingPrice))
+        {
+            AddError(errors, nameof(SaveProductDto.SellingPrice), "سعر البيع يجب أن يكون عدداً صحيحاً.");
         }
 
         if (dto.CurrentStock < 0)
         {
             AddError(errors, nameof(SaveProductDto.CurrentStock), "المخزون الحالي لا يمكن أن يكون أقل من صفر.");
         }
+        else if (dto.CurrentStock != decimal.Truncate(dto.CurrentStock))
+        {
+            AddError(errors, nameof(SaveProductDto.CurrentStock), "المخزون يجب أن يكون عدداً صحيحاً.");
+        }
 
         if (dto.MinimumStock < 0)
         {
             AddError(errors, nameof(SaveProductDto.MinimumStock), "الحد الأدنى للمخزون لا يمكن أن يكون أقل من صفر.");
+        }
+        else if (dto.MinimumStock != decimal.Truncate(dto.MinimumStock))
+        {
+            AddError(errors, nameof(SaveProductDto.MinimumStock), "الحد الأدنى يجب أن يكون عدداً صحيحاً.");
         }
 
         return errors;

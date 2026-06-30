@@ -4,12 +4,18 @@ using AutoPartsPOS.Domain.Catalog;
 using AutoPartsPOS.Domain.Inventory;
 using AutoPartsPOS.Domain.Purchases;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace AutoPartsPOS.Persistence.Inventory;
 
 public sealed class InventoryRepository(AppDbContext dbContext) : IInventoryRepository
 {
-    public async Task<IReadOnlyList<InventoryTransactionDto>> SearchAsync(string? searchText, long? productId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<InventoryTransactionDto>> SearchAsync(
+        string? searchText,
+        long? productId,
+        DateOnly? fromDate = null,
+        DateOnly? toDate = null,
+        CancellationToken cancellationToken = default)
     {
         var query = dbContext.InventoryTransactions
             .AsNoTracking()
@@ -28,10 +34,19 @@ public sealed class InventoryRepository(AppDbContext dbContext) : IInventoryRepo
                 transaction.Product != null && EF.Functions.Like(transaction.Product.NameAr, $"%{term}%"));
         }
 
+        var fromDateInclusive = fromDate?.ToDateTime(TimeOnly.MinValue);
+        var toDateExclusive = toDate?.AddDays(1).ToDateTime(TimeOnly.MinValue);
+
         var transactions = (await query.ToListAsync(cancellationToken))
+            .Where(transaction => fromDateInclusive is null || transaction.TransactionDate.DateTime >= fromDateInclusive.Value)
+            .Where(transaction => toDateExclusive is null || transaction.TransactionDate.DateTime < toDateExclusive.Value)
             .OrderByDescending(transaction => transaction.TransactionDate)
             .ThenByDescending(transaction => transaction.Id)
             .ToList();
+
+        Debug.WriteLine(
+            $"Inventory filter: FromDate={fromDate:yyyy-MM-dd}, ToDate={toDate:yyyy-MM-dd}, " +
+            $"From={fromDateInclusive:O}, ToExclusive={toDateExclusive:O}, Count={transactions.Count}");
 
         var purchaseReferenceIds = transactions
             .Where(transaction => transaction.ReferenceType == InventoryReferenceType.PurchaseInvoice)

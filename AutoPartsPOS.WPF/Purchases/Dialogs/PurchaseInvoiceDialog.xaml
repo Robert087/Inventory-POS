@@ -36,24 +36,18 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <TextBox x:Name="InvoiceNumberTextBox"
-                         Grid.Column="0"
-                         materialDesign:HintAssist.Hint="رقم الفاتورة"
-                         Style="{StaticResource ModernTextBoxStyle}"
-                         TabIndex="0"
-                         Text="{Binding InvoiceNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
-                <ComboBox Grid.Column="2"
+                <ComboBox Grid.Column="0"
                           DisplayMemberPath="NameAr"
                           ItemsSource="{Binding Suppliers}"
                           SelectedItem="{Binding SelectedSupplier}"
                           materialDesign:HintAssist.Hint="المورد"
                           Style="{StaticResource ModernComboBoxStyle}"
-                          TabIndex="1" />
-                <DatePicker Grid.Column="4"
+                          TabIndex="0" />
+                <DatePicker Grid.Column="2"
                             SelectedDate="{Binding InvoiceDate}"
                             materialDesign:HintAssist.Hint="التاريخ"
                             Style="{StaticResource ModernDatePickerStyle}"
-                            TabIndex="2" />
+                            TabIndex="1" />
                 <TextBox Grid.Row="2"
                          Grid.Column="0"
                          Grid.ColumnSpan="5"
@@ -100,14 +94,18 @@
                              materialDesign:HintAssist.Hint="الكمية"
                              Style="{StaticResource ModernTextBoxStyle}"
                              TabIndex="5"
-                             Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat=N3}" />
+                             DataObject.Pasting="WholeNumberTextBox_Pasting"
+                             PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                             Text="{Binding QuantityText, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBox x:Name="UnitPriceTextBox"
                              Grid.Column="2"
                              Margin="8,0,0,0"
                              materialDesign:HintAssist.Hint="سعر الوحدة"
                              Style="{StaticResource ModernTextBoxStyle}"
                              TabIndex="6"
-                             Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
+                             DataObject.Pasting="WholeNumberTextBox_Pasting"
+                             PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                             Text="{Binding UnitPriceText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button x:Name="AddLineButton"
                             Grid.Column="3"
                             Margin="8,0,0,0"
@@ -142,9 +140,9 @@
                           Style="{StaticResource ModernDataGridStyle}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="2*" Binding="{Binding Product.NameAr}" Header="الصنف" />
-                        <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=N3}" Header="الكمية" />
-                        <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=N2}" Header="سعر الوحدة" />
-                        <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=N2}" Header="الإجمالي" />
+                        <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=F0}" Header="الكمية" />
+                        <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=F0}" Header="سعر الوحدة" />
+                        <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=F0}" Header="الإجمالي" />
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -181,7 +179,7 @@
             </StackPanel>
 
             <StackPanel>
-                <TextBlock HorizontalAlignment="Right" FontSize="18" FontWeight="SemiBold" Text="{Binding InvoiceTotal, StringFormat=الإجمالي: {0:N2}}" />
+                <TextBlock HorizontalAlignment="Right" FontSize="18" FontWeight="SemiBold" Text="{Binding InvoiceTotal, StringFormat=الإجمالي: {0:F0}}" />
                 <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource MaterialDesignValidationErrorBrush}" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
             </StackPanel>
         </DockPanel>

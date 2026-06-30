@@ -18,6 +18,12 @@ public sealed partial class SalesInvoicesViewModel(
     private string? _searchText;
 
     [ObservableProperty]
+    private DateTime? _fromDate;
+
+    [ObservableProperty]
+    private DateTime? _toDate;
+
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ViewCommand))]
     [NotifyCanExecuteChangedFor(nameof(VoidCommand))]
     private SalesInvoiceListDto? _selectedInvoice;
@@ -31,6 +37,21 @@ public sealed partial class SalesInvoicesViewModel(
     [RelayCommand]
     private async Task SearchAsync()
     {
+        if (FromDate is not null && ToDate is not null && FromDate.Value.Date > ToDate.Value.Date)
+        {
+            ErrorMessage = "تاريخ البداية يجب ألا يكون بعد تاريخ النهاية.";
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task ClearFiltersAsync()
+    {
+        SearchText = null;
+        FromDate = null;
+        ToDate = null;
         await LoadAsync();
     }
 
@@ -55,7 +76,10 @@ public sealed partial class SalesInvoicesViewModel(
 
         if (details is not null)
         {
-            await dialogService.ShowDetailsDialogAsync(details);
+            if (await dialogService.ShowDetailsDialogAsync(details))
+            {
+                await LoadAsync();
+            }
         }
     }
 
@@ -63,6 +87,11 @@ public sealed partial class SalesInvoicesViewModel(
     private async Task VoidAsync()
     {
         if (SelectedInvoice is null)
+        {
+            return;
+        }
+
+        if (!await dialogService.ShowCancelConfirmationAsync())
         {
             return;
         }
@@ -88,11 +117,15 @@ public sealed partial class SalesInvoicesViewModel(
             await ExecuteBusyAsync(async token =>
             {
                 Invoices.Clear();
+                DateOnly? fromDate = FromDate is null ? null : DateOnly.FromDateTime(FromDate.Value.Date);
+                DateOnly? toDate = ToDate is null ? null : DateOnly.FromDateTime(ToDate.Value.Date);
 
-                foreach (var invoice in await salesInvoiceService.SearchAsync(SearchText, token))
+                foreach (var invoice in await salesInvoiceService.SearchAsync(SearchText, fromDate, toDate, token))
                 {
                     Invoices.Add(invoice);
                 }
+
+                ErrorMessage = null;
             }, cancellationToken);
         }
         catch (Exception exception)
@@ -108,6 +141,6 @@ public sealed partial class SalesInvoicesViewModel(
 
     private bool CanVoidSelectedInvoice()
     {
-        return SelectedInvoice?.Status == "مُرحّلة";
+        return SelectedInvoice is not null && SelectedInvoice.Status != "ملغاة";
     }
 }

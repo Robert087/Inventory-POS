@@ -16,6 +16,7 @@ using AutoPartsPOS.Application.Reports.Services;
 using AutoPartsPOS.Application.Suppliers.Dtos;
 using AutoPartsPOS.Application.Suppliers.Interfaces;
 using AutoPartsPOS.Domain.Catalog;
+using AutoPartsPOS.Domain.Common;
 using AutoPartsPOS.Domain.Inventory;
 using AutoPartsPOS.Domain.Purchases;
 using AutoPartsPOS.Domain.Sales;
@@ -84,6 +85,8 @@ internal static class Program
             InvoiceNumber = "SAL-TEST-001",
             InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
             DiscountAmount = 5,
+            PaymentStatus = InvoicePaymentStatus.PartiallyPaid,
+            PaidAmount = 30,
             Items = [new CreateSalesInvoiceItemDto { ProductId = product.Id, Quantity = 4, UnitPrice = 20 }]
         });
         Assert(salesResult.Succeeded, "Sales invoice creation failed.");
@@ -91,22 +94,42 @@ internal static class Program
         Assert(salesRepository.Invoices.Single().Items.Single().UnitCost == 10, "Sale did not store WAC unit cost snapshot.");
         Assert(salesRepository.Invoices.Single().Items.Single().TotalCost == 40, "Sale did not store WAC total cost snapshot.");
         Assert(inventoryRepository.Transactions.Any(item => item.TransactionType == InventoryTransactionType.Sale && item.Quantity == -4), "Sale ledger entry missing.");
+        Assert(salesRepository.Invoices.Single().PaidAmount == 30 && salesRepository.Invoices.Single().RemainingAmount == 45,
+            "Partial payment calculation failed.");
+        var movementCountBeforePaymentEdit = inventoryRepository.Transactions.Count;
+        Assert((await salesService.UpdatePaymentAsync(salesRepository.Invoices.Single().Id, InvoicePaymentStatus.Paid, 0)).Succeeded,
+            "Payment edit failed.");
+        Assert(inventoryRepository.Transactions.Count == movementCountBeforePaymentEdit,
+            "Payment edit created a stock movement.");
 
         var oversellResult = await salesService.CreateAsync(new CreateSalesInvoiceDto
         {
             InvoiceNumber = "SAL-TEST-OVERSELL",
             InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            PaymentStatus = InvoicePaymentStatus.Unpaid,
             Items = [new CreateSalesInvoiceItemDto { ProductId = product.Id, Quantity = 7, UnitPrice = 20 }]
         });
         Assert(!oversellResult.Succeeded, "Oversell validation failed.");
         Assert(product.CurrentStock == 6, "Oversell attempt changed stock.");
 
         var savedSale = salesRepository.Invoices.Single();
+        var paidAmountBeforeVoid = savedSale.PaidAmount;
+        var remainingAmountBeforeVoid = savedSale.RemainingAmount;
         var voidResult = await salesService.VoidAsync(savedSale.Id, "اختبار الإلغاء");
         Assert(voidResult.Succeeded, "Sales invoice void failed.");
+        Assert(savedSale.Status == SalesInvoiceStatus.Voided, "Sales invoice status was not changed to voided.");
         Assert(product.CurrentStock == 10, "Voiding sale did not restore stock.");
-        Assert(inventoryRepository.Transactions.Any(item => item.TransactionType == InventoryTransactionType.VoidSale && item.Quantity == 4), "Void sale ledger entry missing.");
+        Assert(inventoryRepository.Transactions.Count(item => item.TransactionType == InventoryTransactionType.VoidSale && item.Quantity == 4) == 1, "Expected exactly one sales void ledger entry.");
+        Assert(savedSale.PaidAmount == paidAmountBeforeVoid && savedSale.RemainingAmount == remainingAmountBeforeVoid,
+            "Voiding a sale changed its payment tracking values.");
         Assert(unitOfWork.TransactionCount == 3, "Expected purchase, sale, and void operations to be transactional.");
+
+        var movementCountAfterVoid = inventoryRepository.Transactions.Count;
+        var duplicateVoidResult = await salesService.VoidAsync(savedSale.Id, "اختبار إلغاء مكرر");
+        Assert(!duplicateVoidResult.Succeeded, "A sales invoice was cancelled twice.");
+        Assert(product.CurrentStock == 10, "Duplicate cancellation changed stock.");
+        Assert(inventoryRepository.Transactions.Count == movementCountAfterVoid, "Duplicate cancellation created an inventory movement.");
+        Assert(unitOfWork.TransactionCount == 3, "Duplicate cancellation opened a stock transaction.");
 
         var details = await salesRepository.GetDetailsAsync(savedSale.Id) ?? throw new InvalidOperationException("Saved sales invoice details missing.");
         var printService = new SalesInvoicePrintService(new FakeApplicationSettingsService());
@@ -176,6 +199,8 @@ internal static class Program
         Console.WriteLine("SALE_STOCK_DECREASE:PASS");
         Console.WriteLine("OVERSELL_REJECTED:PASS");
         Console.WriteLine("VOID_SALE_STOCK_RESTORE:PASS");
+        Console.WriteLine("VOID_SALE_DUPLICATE_PROTECTION:PASS");
+        Console.WriteLine("VOID_SALE_PAYMENT_VALUES_PRESERVED:PASS");
         Console.WriteLine("LEDGER_PURCHASE_SALE_VOIDSALE:PASS");
         Console.WriteLine("TRANSACTION_BOUNDARIES:PASS");
         Console.WriteLine("PRINT_DOCUMENT_GENERATION:PASS");
@@ -233,7 +258,7 @@ internal static class Program
     {
         public List<InventoryTransaction> Transactions { get; } = [];
 
-        public Task<IReadOnlyList<InventoryTransactionDto>> SearchAsync(string? searchText, long? productId, CancellationToken cancellationToken = default) =>
+        public Task<IReadOnlyList<InventoryTransactionDto>> SearchAsync(string? searchText, long? productId, DateOnly? fromDate = null, DateOnly? toDate = null, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<InventoryTransactionDto>>([]);
 
         public Task<Product?> GetProductForUpdateAsync(long productId, CancellationToken cancellationToken = default) =>
@@ -275,7 +300,7 @@ internal static class Program
     {
         public List<SalesInvoice> Invoices { get; } = [];
 
-        public Task<IReadOnlyList<SalesInvoiceListDto>> SearchAsync(string? searchText, CancellationToken cancellationToken = default) =>
+        public Task<IReadOnlyList<SalesInvoiceListDto>> SearchAsync(string? searchText, DateOnly? fromDate = null, DateOnly? toDate = null, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<SalesInvoiceListDto>>(Invoices.Select(ToListDto).ToList());
 
         public Task<SalesInvoiceDetailsDto?> GetDetailsAsync(long id, CancellationToken cancellationToken = default) =>
@@ -300,10 +325,10 @@ internal static class Program
         }
 
         private static SalesInvoiceListDto ToListDto(SalesInvoice invoice) =>
-            new(invoice.Id, invoice.InvoiceNumber, invoice.InvoiceDate, invoice.Status.ToString(), invoice.SubtotalAmount, invoice.DiscountAmount, invoice.NetTotalAmount, invoice.Notes);
+            new(invoice.Id, invoice.InvoiceNumber, invoice.InvoiceDate, invoice.Status.ToString(), invoice.SubtotalAmount, invoice.DiscountAmount, invoice.NetTotalAmount, invoice.PaidAmount, invoice.RemainingAmount, invoice.Notes);
 
         private static SalesInvoiceDetailsDto ToDetailsDto(SalesInvoice invoice) =>
-            new(invoice.Id, invoice.InvoiceNumber, invoice.InvoiceDate, invoice.Status.ToString(), invoice.SubtotalAmount, invoice.DiscountAmount, invoice.NetTotalAmount, invoice.Notes,
+            new(invoice.Id, invoice.InvoiceNumber, invoice.InvoiceDate, invoice.Status.ToString(), invoice.PaymentStatus, invoice.Status == SalesInvoiceStatus.Voided, invoice.SubtotalAmount, invoice.DiscountAmount, invoice.NetTotalAmount, invoice.PaidAmount, invoice.RemainingAmount, invoice.Notes,
                 invoice.Items.Select(item => new SalesInvoiceItemDto(item.Id, item.ProductId, "منتج اختبار", item.Quantity, item.UnitPrice, item.TotalPrice, item.UnitCost, item.TotalCost)).ToList());
     }
 

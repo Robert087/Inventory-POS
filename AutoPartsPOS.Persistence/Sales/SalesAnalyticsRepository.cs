@@ -70,6 +70,12 @@ public sealed class SalesAnalyticsRepository(AppDbContext dbContext) : ISalesAna
                 invoice.Status == SalesInvoiceStatus.Posted &&
                 invoice.InvoiceDate >= fromDate &&
                 invoice.InvoiceDate <= toDate)
+            .Select(invoice => new
+            {
+                invoice.SubtotalAmount,
+                invoice.DiscountAmount,
+                invoice.NetTotalAmount
+            })
             .ToListAsync(cancellationToken);
 
         return new SalesSummaryDto(

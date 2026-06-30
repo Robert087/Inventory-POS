@@ -4,6 +4,7 @@ using AutoPartsPOS.Application.Inventory.Interfaces;
 using AutoPartsPOS.Application.Sales.Dtos;
 using AutoPartsPOS.Application.Sales.Interfaces;
 using AutoPartsPOS.Domain.Inventory;
+using AutoPartsPOS.Domain.Common;
 using AutoPartsPOS.Domain.Sales;
 using System.Text;
 
@@ -15,9 +16,13 @@ public sealed class SalesInvoiceService(
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork) : ISalesInvoiceService
 {
-    public Task<IReadOnlyList<SalesInvoiceListDto>> SearchAsync(string? searchText, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<SalesInvoiceListDto>> SearchAsync(
+        string? searchText,
+        DateOnly? fromDate = null,
+        DateOnly? toDate = null,
+        CancellationToken cancellationToken = default)
     {
-        return salesInvoiceRepository.SearchAsync(searchText, cancellationToken);
+        return salesInvoiceRepository.SearchAsync(searchText, fromDate, toDate, cancellationToken);
     }
 
     public Task<SalesInvoiceDetailsDto?> GetDetailsAsync(long id, CancellationToken cancellationToken = default)
@@ -72,6 +77,10 @@ public sealed class SalesInvoiceService(
 
             invoice.SubtotalAmount = invoice.Items.Sum(item => item.TotalPrice);
             invoice.NetTotalAmount = invoice.SubtotalAmount - invoice.DiscountAmount;
+            var payment = CalculatePayment(dto.PaymentStatus!.Value, invoice.NetTotalAmount, dto.PaidAmount);
+            invoice.PaymentStatus = dto.PaymentStatus.Value;
+            invoice.PaidAmount = payment.PaidAmount;
+            invoice.RemainingAmount = payment.RemainingAmount;
 
             await salesInvoiceRepository.AddAsync(invoice, token);
             await unitOfWork.SaveChangesAsync(token);
@@ -104,6 +113,41 @@ public sealed class SalesInvoiceService(
             await unitOfWork.SaveChangesAsync(token);
         }, cancellationToken);
 
+        return OperationResult.Success();
+    }
+
+    public async Task<OperationResult> UpdatePaymentAsync(
+        long id,
+        InvoicePaymentStatus paymentStatus,
+        decimal paidAmount,
+        CancellationToken cancellationToken = default)
+    {
+        var errors = new Dictionary<string, List<string>>();
+        var invoice = await salesInvoiceRepository.GetByIdWithItemsAsync(id, cancellationToken);
+
+        if (invoice is null)
+        {
+            AddError(errors, string.Empty, "فاتورة البيع غير موجودة.");
+        }
+        else if (invoice.Status == SalesInvoiceStatus.Voided)
+        {
+            AddError(errors, nameof(SalesInvoice.Status), "لا يمكن تعديل دفعات فاتورة ملغاة.");
+        }
+        else
+        {
+            ValidatePayment(paymentStatus, paidAmount, invoice.NetTotalAmount, errors);
+        }
+
+        if (errors.Count > 0)
+        {
+            return OperationResult.Failure(errors);
+        }
+
+        var payment = CalculatePayment(paymentStatus, invoice!.NetTotalAmount, paidAmount);
+        invoice.PaymentStatus = paymentStatus;
+        invoice.PaidAmount = payment.PaidAmount;
+        invoice.RemainingAmount = payment.RemainingAmount;
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return OperationResult.Success();
     }
 
@@ -183,9 +227,18 @@ public sealed class SalesInvoiceService(
             AddError(errors, nameof(CreateSalesInvoiceDto.Items), "يجب إضافة منتج واحد على الأقل.");
         }
 
+        if (dto.PaymentStatus is null || !Enum.IsDefined(dto.PaymentStatus.Value))
+        {
+            AddError(errors, nameof(CreateSalesInvoiceDto.PaymentStatus), "يجب اختيار حالة الدفع.");
+        }
+
         if (dto.DiscountAmount < 0)
         {
             AddError(errors, nameof(CreateSalesInvoiceDto.DiscountAmount), "الخصم لا يمكن أن يكون أقل من صفر.");
+        }
+        else if (dto.DiscountAmount != decimal.Truncate(dto.DiscountAmount))
+        {
+            AddError(errors, nameof(CreateSalesInvoiceDto.DiscountAmount), "الخصم يجب أن يكون عدداً صحيحاً.");
         }
 
         var subtotal = dto.Items.Sum(item => decimal.Round(item.Quantity * item.UnitPrice, 2));
@@ -193,6 +246,11 @@ public sealed class SalesInvoiceService(
         if (dto.DiscountAmount > subtotal)
         {
             AddError(errors, nameof(CreateSalesInvoiceDto.DiscountAmount), "الخصم لا يمكن أن يكون أكبر من إجمالي الفاتورة.");
+        }
+
+        if (dto.PaymentStatus is not null)
+        {
+            ValidatePayment(dto.PaymentStatus.Value, dto.PaidAmount, subtotal - dto.DiscountAmount, errors);
         }
 
         for (var index = 0; index < dto.Items.Count; index++)
@@ -211,10 +269,18 @@ public sealed class SalesInvoiceService(
             {
                 AddError(errors, $"{nameof(CreateSalesInvoiceDto.Items)}[{index}].{nameof(CreateSalesInvoiceItemDto.Quantity)}", "الكمية يجب أن تكون أكبر من صفر.");
             }
+            else if (item.Quantity != decimal.Truncate(item.Quantity))
+            {
+                AddError(errors, $"{nameof(CreateSalesInvoiceDto.Items)}[{index}].{nameof(CreateSalesInvoiceItemDto.Quantity)}", "الكمية يجب أن تكون عدداً صحيحاً.");
+            }
 
             if (item.UnitPrice < 0)
             {
                 AddError(errors, $"{nameof(CreateSalesInvoiceDto.Items)}[{index}].{nameof(CreateSalesInvoiceItemDto.UnitPrice)}", "سعر الوحدة لا يمكن أن يكون أقل من صفر.");
+            }
+            else if (item.UnitPrice != decimal.Truncate(item.UnitPrice))
+            {
+                AddError(errors, $"{nameof(CreateSalesInvoiceDto.Items)}[{index}].{nameof(CreateSalesInvoiceItemDto.UnitPrice)}", "سعر الوحدة يجب أن يكون عدداً صحيحاً.");
             }
         }
 
@@ -231,11 +297,48 @@ public sealed class SalesInvoiceService(
 
             if (product.CurrentStock < requestedQuantity)
             {
-                AddError(errors, nameof(CreateSalesInvoiceDto.Items), $"لا يمكن بيع كمية أكبر من المتاح للمنتج {product.NameAr}. المتاح: {product.CurrentStock:N3}.");
+                AddError(errors, nameof(CreateSalesInvoiceDto.Items), $"لا يمكن بيع كمية أكبر من المتاح للمنتج {product.NameAr}. المتاح: {product.CurrentStock:F0}.");
             }
         }
 
         return errors;
+    }
+
+    private static void ValidatePayment(
+        InvoicePaymentStatus paymentStatus,
+        decimal paidAmount,
+        decimal netTotal,
+        Dictionary<string, List<string>> errors)
+    {
+        if (!Enum.IsDefined(paymentStatus))
+        {
+            AddError(errors, nameof(CreateSalesInvoiceDto.PaymentStatus), "حالة الدفع غير صحيحة.");
+            return;
+        }
+
+        if (paidAmount < 0 || paidAmount != decimal.Truncate(paidAmount))
+        {
+            AddError(errors, nameof(CreateSalesInvoiceDto.PaidAmount), "المبلغ المدفوع يجب أن يكون عدداً صحيحاً غير سالب.");
+        }
+
+        if (paymentStatus == InvoicePaymentStatus.PartiallyPaid && (paidAmount <= 0 || paidAmount >= netTotal))
+        {
+            AddError(errors, nameof(CreateSalesInvoiceDto.PaidAmount), "الدفع الجزئي يجب أن يكون أكبر من صفر وأقل من صافي الفاتورة.");
+        }
+    }
+
+    private static (decimal PaidAmount, decimal RemainingAmount) CalculatePayment(
+        InvoicePaymentStatus paymentStatus,
+        decimal netTotal,
+        decimal requestedPaidAmount)
+    {
+        return paymentStatus switch
+        {
+            InvoicePaymentStatus.Paid => (netTotal, 0),
+            InvoicePaymentStatus.Unpaid => (0, netTotal),
+            InvoicePaymentStatus.PartiallyPaid => (requestedPaidAmount, netTotal - requestedPaidAmount),
+            _ => throw new ArgumentOutOfRangeException(nameof(paymentStatus))
+        };
     }
 
     private static string Normalize(string value)

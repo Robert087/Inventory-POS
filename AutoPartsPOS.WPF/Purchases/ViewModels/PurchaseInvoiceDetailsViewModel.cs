@@ -22,7 +22,7 @@ public sealed partial class PurchaseInvoiceDetailsViewModel : ViewModelBase
     public void Load(PurchaseInvoiceDetailsDto invoice)
     {
         Invoice = invoice;
-        Title = $"فاتورة شراء {invoice.InvoiceNumber}";
+        Title = "تفاصيل فاتورة الشراء";
         OnPropertyChanged(nameof(Invoice));
     }
 

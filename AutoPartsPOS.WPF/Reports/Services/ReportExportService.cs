@@ -20,9 +20,9 @@ public sealed class ReportExportService : IReportExportService
             ("من", report.FromDate.ToString()),
             ("إلى", report.ToDate.ToString()),
             ("عدد الفواتير", report.InvoiceCount.ToString()),
-            ("إجمالي المبيعات", report.TotalSales.ToString("N2")),
-            ("إجمالي الخصم", report.TotalDiscount.ToString("N2")),
-            ("صافي المبيعات", report.NetSales.ToString("N2"))
+            ("إجمالي المبيعات", report.TotalSales.ToString("F0")),
+            ("إجمالي الخصم", report.TotalDiscount.ToString("F0")),
+            ("صافي المبيعات", report.NetSales.ToString("F0"))
         ], cancellationToken);
 
     public Task ExportProfitReportToPdfAsync(ProfitReportDto report, string filePath, CancellationToken cancellationToken = default) =>
@@ -30,9 +30,9 @@ public sealed class ReportExportService : IReportExportService
         [
             ("من", report.FromDate.ToString()),
             ("إلى", report.ToDate.ToString()),
-            ("الإيرادات", report.Revenue.ToString("N2")),
-            ("التكلفة", report.Cost.ToString("N2")),
-            ("الربح", report.Profit.ToString("N2"))
+            ("الإيرادات", report.Revenue.ToString("F0")),
+            ("التكلفة", report.Cost.ToString("F0")),
+            ("الربح", report.Profit.ToString("F0"))
         ], cancellationToken);
 
     public Task ExportInventoryReportToPdfAsync(InventoryReportDto report, string filePath, CancellationToken cancellationToken = default)
@@ -49,7 +49,7 @@ public sealed class ReportExportService : IReportExportService
                 page.Content().Column(column =>
                 {
                     column.Spacing(8);
-                    column.Item().Text($"إجمالي قيمة المخزون: {report.InventoryValue:N2}");
+                    column.Item().Text($"إجمالي قيمة المخزون: {report.InventoryValue:F0}");
                     column.Item().Text($"عدد المنتجات منخفضة المخزون: {report.LowStockCount}");
                     column.Item().Table(table =>
                     {
@@ -66,8 +66,8 @@ public sealed class ReportExportService : IReportExportService
                         {
                             table.Cell().BorderBottom(1).Padding(4).Text(item.ProductCode);
                             table.Cell().BorderBottom(1).Padding(4).Text(item.ProductNameAr);
-                            table.Cell().BorderBottom(1).Padding(4).Text(item.CurrentStock.ToString("N3"));
-                            table.Cell().BorderBottom(1).Padding(4).Text(item.InventoryValue.ToString("N2"));
+                            table.Cell().BorderBottom(1).Padding(4).Text(item.CurrentStock.ToString("F0"));
+                            table.Cell().BorderBottom(1).Padding(4).Text(item.InventoryValue.ToString("F0"));
                             table.Cell().BorderBottom(1).Padding(4).Text(item.IsLowStock ? "نعم" : "لا");
                         }
                     });
@@ -166,6 +166,10 @@ public sealed class ReportExportService : IReportExportService
     private static void StyleSheet(IXLWorksheet sheet)
     {
         sheet.Row(1).Style.Font.Bold = true;
+        foreach (var cell in sheet.CellsUsed().Where(cell => cell.DataType == XLDataType.Number))
+        {
+            cell.Style.NumberFormat.Format = "0";
+        }
         sheet.Columns().AdjustToContents();
         sheet.RangeUsed()?.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
         sheet.RangeUsed()?.Style.Border.SetInsideBorder(XLBorderStyleValues.Thin);

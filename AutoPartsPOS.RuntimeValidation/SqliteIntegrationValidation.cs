@@ -11,6 +11,7 @@ using AutoPartsPOS.Application.Sales.Interfaces;
 using AutoPartsPOS.Application.Suppliers.Dtos;
 using AutoPartsPOS.Application.Suppliers.Interfaces;
 using AutoPartsPOS.Domain.Inventory;
+using AutoPartsPOS.Domain.Common;
 using AutoPartsPOS.Infrastructure;
 using AutoPartsPOS.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -66,11 +67,12 @@ internal static class SqliteIntegrationValidation
             NameAr = "منتج اختبار SQLite",
             CategoryId = category.Id,
             PurchasePrice = 10,
-            SellingPrice = 20,
+            SellingPrice = 0,
             CurrentStock = 0,
             MinimumStock = 2
         })).Succeeded, "Product creation failed.");
         var product = (await productService.SearchAsync("SQLITE-001", category.Id)).Single();
+        Assert(product.SellingPrice == 0, "Product without selling price was not saved safely.");
 
         Assert((await supplierService.SaveAsync(new SaveSupplierDto { NameAr = "مورد اختبار SQLite" })).Succeeded, "Supplier creation failed.");
         var supplier = (await supplierService.SearchAsync("SQLite")).Single();
@@ -91,25 +93,77 @@ internal static class SqliteIntegrationValidation
             InvoiceNumber = "SAL-SQLITE-001",
             InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
             DiscountAmount = 5,
+            PaymentStatus = InvoicePaymentStatus.Paid,
             Items = [new CreateSalesInvoiceItemDto { ProductId = product.Id, Quantity = 4, UnitPrice = 20 }]
         })).Succeeded, "Sales invoice creation failed.");
         Assert((await productService.GetByIdAsync(product.Id))!.CurrentStock == 6, "Sale did not decrease stock.");
 
         var sale = (await salesService.SearchAsync("SAL-SQLITE-001")).Single();
         var saleDetails = await salesService.GetDetailsAsync(sale.Id);
+        Assert(sale.Status == "مدفوعة بالكامل" && sale.PaidAmount == 75 && sale.RemainingAmount == 0,
+            "Fully paid sales invoice payment values are incorrect.");
         Assert(saleDetails!.Items.Single().UnitCost == 10, "Sale did not store WAC unit cost snapshot.");
         Assert(saleDetails.Items.Single().TotalCost == 40, "Sale did not store WAC total cost snapshot.");
         Assert((await salesService.VoidAsync(sale.Id, "اختبار SQLite")).Succeeded, "Sales void failed.");
         Assert((await productService.GetByIdAsync(product.Id))!.CurrentStock == 10, "Sales void did not restore stock.");
 
+        Assert((await salesService.CreateAsync(new CreateSalesInvoiceDto
+        {
+            InvoiceNumber = "SAL-SQLITE-PARTIAL",
+            InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            PaymentStatus = InvoicePaymentStatus.PartiallyPaid,
+            PaidAmount = 5,
+            Items = [new CreateSalesInvoiceItemDto { ProductId = product.Id, Quantity = 1, UnitPrice = 20 }]
+        })).Succeeded, "Partially paid sales invoice creation failed.");
+        var partialSale = (await salesService.SearchAsync("SAL-SQLITE-PARTIAL")).Single();
+        Assert(partialSale.PaidAmount == 5 && partialSale.RemainingAmount == 15 && partialSale.Status == "مدفوعة جزئياً",
+            "Partial payment calculation is incorrect.");
+        var ledgerCountBeforePaymentEdit = (await inventoryService.SearchAsync(null, product.Id)).Count;
+        Assert((await salesService.UpdatePaymentAsync(partialSale.Id, InvoicePaymentStatus.Paid, 0)).Succeeded,
+            "Payment-only edit failed.");
+        var editedPartialSale = (await salesService.SearchAsync("SAL-SQLITE-PARTIAL")).Single();
+        Assert(editedPartialSale.PaidAmount == 20 && editedPartialSale.RemainingAmount == 0 && editedPartialSale.Status == "مدفوعة بالكامل",
+            "Payment-only edit values are incorrect.");
+        Assert((await inventoryService.SearchAsync(null, product.Id)).Count == ledgerCountBeforePaymentEdit,
+            "Payment-only edit created a duplicate stock movement.");
+
+        Assert((await salesService.CreateAsync(new CreateSalesInvoiceDto
+        {
+            InvoiceNumber = "SAL-SQLITE-UNPAID",
+            InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            PaymentStatus = InvoicePaymentStatus.Unpaid,
+            PaidAmount = 0,
+            Items = [new CreateSalesInvoiceItemDto { ProductId = product.Id, Quantity = 1, UnitPrice = 20 }]
+        })).Succeeded, "Unpaid sales invoice creation failed.");
+        var unpaidSale = (await salesService.SearchAsync("SAL-SQLITE-UNPAID")).Single();
+        Assert(unpaidSale.PaidAmount == 0 && unpaidSale.RemainingAmount == 20 && unpaidSale.Status == "غير مدفوعة",
+            "Unpaid invoice payment values are incorrect.");
+
+        var salesFilterDate = DateOnly.FromDateTime(DateTime.Today);
+        var salesToday = await salesService.SearchAsync(null, salesFilterDate, salesFilterDate);
+        Assert(salesToday.Count == 3, "Same-day sales filtering excluded invoices from the selected date.");
+        var futureSales = await salesService.SearchAsync(null, salesFilterDate.AddDays(1), salesFilterDate.AddDays(1));
+        Assert(futureSales.Count == 0, "Sales date filtering returned invoices outside the selected date.");
+
         var ledger = await inventoryService.SearchAsync(null, product.Id);
-        Assert(ledger.Count == 3, "Expected purchase, sale, and void-sale ledger entries.");
+        Assert(ledger.Count == 5, "Expected purchase, sale, void-sale, partial-sale, and unpaid-sale ledger entries.");
+        var todayOnlyLedger = await inventoryService.SearchAsync(null, product.Id, DateOnly.FromDateTime(DateTime.Today), DateOnly.FromDateTime(DateTime.Today));
+        Assert(todayOnlyLedger.Count == ledger.Count, "Inventory date filtering excluded today's movements.");
+        var futureLedger = await inventoryService.SearchAsync(null, product.Id, DateOnly.FromDateTime(DateTime.Today.AddDays(1)), null);
+        Assert(futureLedger.Count == 0, "Inventory date filtering returned movements outside the range.");
 
         var today = DateOnly.FromDateTime(DateTime.Today);
         _ = await reportingService.GetSalesReportAsync(today.AddDays(-1), today.AddDays(1));
-        _ = await reportingService.GetProfitReportAsync(today.AddDays(-1), today.AddDays(1));
+        var profitReport = await reportingService.GetProfitReportAsync(today, today);
         _ = await reportingService.GetInventoryReportAsync();
-        _ = await dashboardService.LoadAsync();
+        var dailySales = await dashboardService.GetDailySalesAsync(today);
+        var dailyReport = await reportingService.GetSalesReportAsync(today, today);
+        Assert(dailySales == dailyReport.NetSales, "Dashboard daily sales do not match the exact-date sales report.");
+        var monthStart = new DateOnly(today.Year, today.Month, 1);
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+        var monthProfitReport = await reportingService.GetProfitReportAsync(monthStart, monthEnd);
+        var monthStatistics = await dashboardService.GetMonthlyStatisticsAsync(today.Year, today.Month);
+        Assert(monthStatistics.NetProfit == monthProfitReport.Profit, "Dashboard monthly profit does not match the profit report.");
 
         Console.WriteLine($"SQLITE_DATABASE_PATH:{databasePath}");
         Console.WriteLine("SQLITE_AUTO_CREATE:PASS");
@@ -119,7 +173,11 @@ internal static class SqliteIntegrationValidation
         Console.WriteLine("SQLITE_SALES_TRANSACTION:PASS");
         Console.WriteLine("SQLITE_VOID_SALE_TRANSACTION:PASS");
         Console.WriteLine("SQLITE_INVENTORY_LEDGER:PASS");
+        Console.WriteLine("SQLITE_INVENTORY_DATE_FILTER:PASS");
+        Console.WriteLine("SQLITE_SALES_PAYMENT_TRACKING:PASS");
+        Console.WriteLine("SQLITE_OPTIONAL_SELLING_PRICE:PASS");
         Console.WriteLine("SQLITE_REPORTS:PASS");
+        Console.WriteLine("SQLITE_DASHBOARD_PROFIT_FILTER:PASS");
         Console.WriteLine("SQLITE_DASHBOARD:PASS");
     }
 

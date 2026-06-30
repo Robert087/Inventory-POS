@@ -6,7 +6,12 @@ namespace AutoPartsPOS.Application.Inventory.Interfaces;
 
 public interface IInventoryRepository
 {
-    Task<IReadOnlyList<InventoryTransactionDto>> SearchAsync(string? searchText, long? productId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<InventoryTransactionDto>> SearchAsync(
+        string? searchText,
+        long? productId,
+        DateOnly? fromDate = null,
+        DateOnly? toDate = null,
+        CancellationToken cancellationToken = default);
 
     Task<Product?> GetProductForUpdateAsync(long productId, CancellationToken cancellationToken = default);
 

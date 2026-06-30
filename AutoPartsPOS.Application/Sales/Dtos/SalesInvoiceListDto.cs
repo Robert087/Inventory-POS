@@ -8,4 +8,6 @@ public sealed record SalesInvoiceListDto(
     decimal SubtotalAmount,
     decimal DiscountAmount,
     decimal NetTotalAmount,
+    decimal PaidAmount,
+    decimal RemainingAmount,
     string? Notes);

@@ -22,22 +22,29 @@
                 </Grid>
 
                 <WrapPanel Margin="0,14,0,0">
-                    <TextBox Width="300"
-                             materialDesign:HintAssist.Hint="ابحث باسم الصنف"
-                             Style="{StaticResource ModernTextBoxStyle}"
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-                    <ComboBox Width="240"
-                              Margin="8,0,0,0"
+                    <ComboBox Width="260"
                               DisplayMemberPath="NameAr"
                               ItemsSource="{Binding Products}"
                               SelectedItem="{Binding SelectedProduct}"
+                              materialDesign:HintAssist.Hint="الصنف"
                               Style="{StaticResource ModernComboBoxStyle}" />
+                    <DatePicker Width="170"
+                                Margin="8,0,0,0"
+                                SelectedDate="{Binding FromDate}"
+                                materialDesign:HintAssist.Hint="من تاريخ"
+                                Style="{StaticResource ModernDatePickerStyle}" />
+                    <DatePicker Width="170"
+                                Margin="8,0,0,0"
+                                SelectedDate="{Binding ToDate}"
+                                materialDesign:HintAssist.Hint="إلى تاريخ"
+                                Style="{StaticResource ModernDatePickerStyle}" />
                     <Button Margin="8,0,0,0" Command="{Binding SearchCommand}" Style="{StaticResource SecondaryButtonStyle}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Margin="0,0,6,0" Kind="Magnify" />
                             <TextBlock Text="بحث" />
                         </StackPanel>
                     </Button>
+                    <Button Margin="8,0,0,0" Command="{Binding ClearFiltersCommand}" Content="مسح الفلاتر" Style="{StaticResource SecondaryButtonStyle}" />
                 </WrapPanel>
             </StackPanel>
         </Border>
@@ -51,9 +58,9 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="2*" Binding="{Binding ProductNameAr}" Header="الصنف" />
                         <DataGridTextColumn Width="140" Binding="{Binding TransactionType}" Header="الحركة" />
-                        <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=N3}" Header="الكمية" />
-                        <DataGridTextColumn Width="140" Binding="{Binding BalanceAfter, StringFormat=N3}" Header="الرصيد" />
-                        <DataGridTextColumn Width="160" Binding="{Binding ReferenceNumber}" Header="المرجع" />
+                        <DataGridTextColumn Width="120" Binding="{Binding DisplayQuantity, StringFormat=F0}" Header="الكمية" />
+                        <DataGridTextColumn Width="140" Binding="{Binding BalanceAfter, StringFormat=F0}" Header="الرصيد" />
+                        <DataGridTextColumn Width="140" Binding="{Binding ReferenceType}" Header="نوع المرجع" />
                         <DataGridTextColumn Width="180" Binding="{Binding TransactionDate, StringFormat=g}" Header="التاريخ" />
                     </DataGrid.Columns>
                 </DataGrid>

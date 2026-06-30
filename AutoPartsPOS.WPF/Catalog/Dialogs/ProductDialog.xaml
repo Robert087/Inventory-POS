@@ -40,15 +40,10 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBox Grid.Row="0" Grid.Column="0"
+            <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
                      materialDesign:HintAssist.Hint="كود الصنف"
                      Style="{StaticResource ModernTextBoxStyle}"
                      Text="{Binding ProductCode, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
-
-            <TextBox Grid.Row="0" Grid.Column="2"
-                     materialDesign:HintAssist.Hint="الباركود"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                      materialDesign:HintAssist.Hint="اسم الصنف"
@@ -66,30 +61,33 @@
             <TextBox Grid.Row="6" Grid.Column="0"
                      materialDesign:HintAssist.Hint="سعر الشراء"
                      Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding PurchasePrice, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N2}" />
+                     DataObject.Pasting="WholeNumberTextBox_Pasting"
+                     PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                     Text="{Binding PurchasePriceText, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBox Grid.Row="6" Grid.Column="2"
                      materialDesign:HintAssist.Hint="سعر البيع"
                      Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding SellingPrice, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N2}" />
+                     DataObject.Pasting="WholeNumberTextBox_Pasting"
+                     PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                     Text="{Binding SellingPriceText, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBox Grid.Row="8" Grid.Column="0"
                      materialDesign:HintAssist.Hint="المخزون الحالي"
                      Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding CurrentStock, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N3}" />
+                     DataObject.Pasting="WholeNumberTextBox_Pasting"
+                     PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                     Text="{Binding CurrentStockText, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBox Grid.Row="8" Grid.Column="2"
                      materialDesign:HintAssist.Hint="الحد الأدنى للمخزون"
                      Style="{StaticResource ModernTextBoxStyle}"
-                     Text="{Binding MinimumStock, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N3}" />
+                     DataObject.Pasting="WholeNumberTextBox_Pasting"
+                     PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                     Text="{Binding MinimumStockText, UpdateSourceTrigger=PropertyChanged}" />
 
             <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,14,0,0">
-                <CheckBox Content="نشط"
-                          IsChecked="{Binding IsActive}"
-                          Style="{StaticResource MaterialDesignCheckBox}" />
-
-                <TextBlock Margin="0,12,0,0"
-                           Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                <TextBlock Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
                            Text="{Binding ErrorMessage}"
                            TextWrapping="Wrap" />
             </StackPanel>

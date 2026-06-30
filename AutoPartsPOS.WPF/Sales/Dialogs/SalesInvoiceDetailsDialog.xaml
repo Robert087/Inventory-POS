@@ -23,15 +23,29 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="{Binding Invoice.InvoiceNumber}" />
+                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="تفاصيل فاتورة البيع" />
                     <TextBlock Margin="0,10,0,0" Text="{Binding Invoice.InvoiceDate, StringFormat=التاريخ: {0}}" />
                     <TextBlock Text="{Binding Invoice.Status, StringFormat=الحالة: {0}}" />
+                    <ComboBox Margin="0,10,0,0"
+                              DisplayMemberPath="Value"
+                              IsEnabled="{Binding CanEditPayment}"
+                              ItemsSource="{Binding PaymentStatuses}"
+                              SelectedValue="{Binding SelectedPaymentStatus}"
+                              SelectedValuePath="Key"
+                              Style="{StaticResource ModernComboBoxStyle}" />
+                    <TextBox Margin="0,8,0,0"
+                             DataObject.Pasting="WholeNumberTextBox_Pasting"
+                             IsEnabled="{Binding IsPartiallyPaid}"
+                             PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                             Text="{Binding PaidAmountText, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource ModernTextBoxStyle}" />
+                    <TextBlock Margin="0,6,0,0" Text="{Binding RemainingAmount, StringFormat=المتبقي: {0:F0}}" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
-                    <TextBlock HorizontalAlignment="Right" Text="{Binding Invoice.SubtotalAmount, StringFormat=الإجمالي قبل الخصم: {0:N2}}" />
-                    <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" Text="{Binding Invoice.DiscountAmount, StringFormat=الخصم: {0:N2}}" />
-                    <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" FontWeight="SemiBold" Text="{Binding Invoice.NetTotalAmount, StringFormat=الصافي: {0:N2}}" />
+                    <TextBlock HorizontalAlignment="Right" Text="{Binding Invoice.SubtotalAmount, StringFormat=الإجمالي قبل الخصم: {0:F0}}" />
+                    <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" Text="{Binding Invoice.DiscountAmount, StringFormat=الخصم: {0:F0}}" />
+                    <TextBlock HorizontalAlignment="Right" Margin="0,6,0,0" FontWeight="SemiBold" Text="{Binding Invoice.NetTotalAmount, StringFormat=الصافي: {0:F0}}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -45,9 +59,9 @@
                       Style="{StaticResource ModernDataGridStyle}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="2*" Binding="{Binding ProductNameAr}" Header="الصنف" />
-                    <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=N3}" Header="الكمية" />
-                    <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=N2}" Header="سعر الوحدة" />
-                    <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=N2}" Header="الإجمالي" />
+                    <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=F0}" Header="الكمية" />
+                    <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=F0}" Header="سعر الوحدة" />
+                    <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=F0}" Header="الإجمالي" />
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -69,6 +83,7 @@
         <StackPanel Grid.Row="2" Margin="0,16,0,0" HorizontalAlignment="Left" Orientation="Horizontal">
             <Button Command="{Binding PreviewCommand}" Content="معاينة" Style="{StaticResource SecondaryButtonStyle}" />
             <Button Margin="8,0,0,0" Command="{Binding PrintCommand}" Content="طباعة" Style="{StaticResource PrimaryButtonStyle}" />
+            <Button Margin="8,0,0,0" Command="{Binding SavePaymentCommand}" Content="حفظ حالة الدفع" IsEnabled="{Binding CanEditPayment}" Style="{StaticResource PrimaryButtonStyle}" />
             <Button Margin="8,0,0,0" Command="{Binding CloseCommand}" Content="إغلاق" Style="{StaticResource SecondaryButtonStyle}" />
         </StackPanel>
     </Grid>

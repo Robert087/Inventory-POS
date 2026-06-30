@@ -8,6 +8,7 @@ public sealed record DashboardDto(
     decimal CurrentMonthSales,
     int InvoiceCount,
     decimal InventoryValue,
+    decimal NetProfit,
     int LowStockCount,
     IReadOnlyList<TopSellingProductDto> TopSellingProducts,
     IReadOnlyList<LowStockInsightDto> LowStockProducts,

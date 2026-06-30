@@ -6,24 +6,69 @@
              Language="ar-EG">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>
-            <Grid Margin="0,0,0,16" FlowDirection="LeftToRight">
+            <TextBlock Margin="0,0,0,16"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource PageTitleStyle}"
+                       Text="لوحة التحكم" />
+
+            <Grid Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Button Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButtonStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Margin="0,0,6,0" Kind="Refresh" />
-                        <TextBlock Text="تحديث" />
+
+                <Border Grid.Column="0" Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="مبيعات اليوم" />
+                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                            <DatePicker Width="180"
+                                        SelectedDate="{Binding DailySalesDate}"
+                                        materialDesign:HintAssist.Hint="اليوم / الشهر / السنة"
+                                        Style="{StaticResource ModernDatePickerStyle}" />
+                            <Button Margin="8,0,0,0"
+                                    Command="{Binding ApplyDailySalesFilterCommand}"
+                                    Content="تطبيق"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="8,0,0,0"
+                                    Command="{Binding ResetDailySalesFilterCommand}"
+                                    Content="إعادة ضبط"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
                     </StackPanel>
-                </Button>
-                <TextBlock Grid.Column="1"
-                           HorizontalAlignment="Right"
-                           Style="{StaticResource PageTitleStyle}"
-                           Text="لوحة التحكم" />
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="مبيعات الشهر" />
+                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                            <ComboBox Width="145"
+                                      DisplayMemberPath="Name"
+                                      ItemsSource="{Binding Months}"
+                                      SelectedValue="{Binding SelectedMonth}"
+                                      SelectedValuePath="Value"
+                                      materialDesign:HintAssist.Hint="الشهر"
+                                      Style="{StaticResource ModernComboBoxStyle}" />
+                            <ComboBox Width="105"
+                                      Margin="8,0,0,0"
+                                      ItemsSource="{Binding Years}"
+                                      SelectedItem="{Binding SelectedYear}"
+                                      materialDesign:HintAssist.Hint="السنة"
+                                      Style="{StaticResource ModernComboBoxStyle}" />
+                            <Button Margin="8,0,0,0"
+                                    Command="{Binding ApplyMonthlyFilterCommand}"
+                                    Content="تطبيق"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="8,0,0,0"
+                                    Command="{Binding ResetMonthlyFilterCommand}"
+                                    Content="إعادة ضبط"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </Grid>
 
-            <UniformGrid Margin="0,0,0,16" Columns="4">
+            <UniformGrid Margin="0,0,0,16" Columns="5">
                 <Border Style="{StaticResource KpiCardStyle}" Background="#ECFDF3" BorderBrush="#B7E6CF">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -32,7 +77,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="مبيعات اليوم" />
-                            <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AppSuccessBrush}" Text="{Binding TodaySales, StringFormat=N2}" />
+                            <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AppSuccessBrush}" Text="{Binding TodaySales, StringFormat=F0}" />
                         </StackPanel>
                         <Border Grid.Column="1" Width="44" Height="44" VerticalAlignment="Top" Background="White" CornerRadius="12">
                             <materialDesign:PackIcon HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AppSuccessBrush}" Kind="CashRegister" />
@@ -48,7 +93,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="مبيعات الشهر" />
-                            <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AppPrimaryBrush}" Text="{Binding CurrentMonthSales, StringFormat=N2}" />
+                            <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AppPrimaryBrush}" Text="{Binding CurrentMonthSales, StringFormat=F0}" />
                         </StackPanel>
                         <Border Grid.Column="1" Width="44" Height="44" VerticalAlignment="Top" Background="White" CornerRadius="12">
                             <materialDesign:PackIcon HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AppPrimaryBrush}" Kind="ChartLine" />
@@ -72,7 +117,7 @@
                     </Grid>
                 </Border>
 
-                <Border Margin="0" Style="{StaticResource KpiCardStyle}" Background="#FFF7ED" BorderBrush="#F9D7AE">
+                <Border Style="{StaticResource KpiCardStyle}" Background="#FFF7ED" BorderBrush="#F9D7AE">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -80,10 +125,26 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="قيمة المخزون" />
-                            <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AppWarningBrush}" Text="{Binding InventoryValue, StringFormat=N2}" />
+                            <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AppWarningBrush}" Text="{Binding InventoryValue, StringFormat=F0}" />
                         </StackPanel>
                         <Border Grid.Column="1" Width="44" Height="44" VerticalAlignment="Top" Background="White" CornerRadius="12">
                             <materialDesign:PackIcon HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AppWarningBrush}" Kind="Warehouse" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0" Style="{StaticResource KpiCardStyle}" Background="#ECFDF3" BorderBrush="#B7E6CF">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="56" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="صافي الربح" />
+                            <TextBlock Margin="0,10,0,0" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AppSuccessBrush}" Text="{Binding NetProfit, StringFormat=F0}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="44" Height="44" VerticalAlignment="Top" Background="White" CornerRadius="12">
+                            <materialDesign:PackIcon HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AppSuccessBrush}" Kind="Finance" />
                         </Border>
                     </Grid>
                 </Border>
@@ -112,8 +173,8 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Width="140" Binding="{Binding ProductCode}" Header="الكود" />
                                     <DataGridTextColumn Width="*" Binding="{Binding ProductNameAr}" Header="الصنف" />
-                                    <DataGridTextColumn Width="120" Binding="{Binding CurrentStock, StringFormat=N3}" Header="الرصيد" />
-                                    <DataGridTextColumn Width="120" Binding="{Binding MinimumStock, StringFormat=N3}" Header="الحد الأدنى" />
+                                    <DataGridTextColumn Width="120" Binding="{Binding CurrentStock, StringFormat=F0}" Header="الرصيد" />
+                                    <DataGridTextColumn Width="120" Binding="{Binding MinimumStock, StringFormat=F0}" Header="الحد الأدنى" />
                                 </DataGrid.Columns>
                             </DataGrid>
                             <Border IsHitTestVisible="False">
@@ -148,8 +209,8 @@
                                       Style="{StaticResource ModernDataGridStyle}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Width="*" Binding="{Binding ProductNameAr}" Header="الصنف" />
-                                    <DataGridTextColumn Width="120" Binding="{Binding QuantitySold, StringFormat=N3}" Header="الكمية" />
-                                    <DataGridTextColumn Width="140" Binding="{Binding SalesAmount, StringFormat=N2}" Header="المبيعات" />
+                                    <DataGridTextColumn Width="120" Binding="{Binding QuantitySold, StringFormat=F0}" Header="الكمية" />
+                                    <DataGridTextColumn Width="140" Binding="{Binding SalesAmount, StringFormat=F0}" Header="المبيعات" />
                                 </DataGrid.Columns>
                             </DataGrid>
                             <Border IsHitTestVisible="False">
@@ -192,7 +253,7 @@
                                       Style="{StaticResource ModernDataGridStyle}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Width="*" Binding="{Binding ProductNameAr}" Header="الصنف" />
-                                    <DataGridTextColumn Width="120" Binding="{Binding CurrentStock, StringFormat=N3}" Header="الرصيد" />
+                                    <DataGridTextColumn Width="120" Binding="{Binding CurrentStock, StringFormat=F0}" Header="الرصيد" />
                                     <DataGridTextColumn Width="140" Binding="{Binding LastSaleDate}" Header="آخر بيع" />
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -227,10 +288,9 @@
                                       ItemsSource="{Binding RecentSales}"
                                       Style="{StaticResource ModernDataGridStyle}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Width="170" Binding="{Binding InvoiceNumber}" Header="الفاتورة" />
                                     <DataGridTextColumn Width="120" Binding="{Binding InvoiceDate}" Header="التاريخ" />
                                     <DataGridTextColumn Width="120" Binding="{Binding Status}" Header="الحالة" />
-                                    <DataGridTextColumn Width="140" Binding="{Binding NetTotalAmount, StringFormat=N2}" Header="الصافي" />
+                                    <DataGridTextColumn Width="140" Binding="{Binding NetTotalAmount, StringFormat=F0}" Header="الصافي" />
                                 </DataGrid.Columns>
                             </DataGrid>
                             <Border IsHitTestVisible="False">
@@ -265,11 +325,9 @@
                                   ItemsSource="{Binding RecentPurchases}"
                                   Style="{StaticResource ModernDataGridStyle}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Width="170" Binding="{Binding InvoiceNumber}" Header="الفاتورة" />
                                 <DataGridTextColumn Width="180" Binding="{Binding SupplierNameAr}" Header="المورد" />
                                 <DataGridTextColumn Width="120" Binding="{Binding InvoiceDate}" Header="التاريخ" />
-                                <DataGridTextColumn Width="120" Binding="{Binding Status}" Header="الحالة" />
-                                <DataGridTextColumn Width="140" Binding="{Binding TotalAmount, StringFormat=N2}" Header="الإجمالي" />
+                                <DataGridTextColumn Width="140" Binding="{Binding TotalAmount, StringFormat=F0}" Header="الإجمالي" />
                             </DataGrid.Columns>
                         </DataGrid>
                         <Border IsHitTestVisible="False">

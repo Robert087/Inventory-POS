@@ -42,15 +42,29 @@
 
                 <StackPanel Margin="0,14,0,0" Orientation="Horizontal">
                     <TextBox Width="320"
-                             materialDesign:HintAssist.Hint="ابحث برقم الفاتورة أو الملاحظات"
+                             materialDesign:HintAssist.Hint="بحث"
                              Style="{StaticResource ModernTextBoxStyle}"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                    <DatePicker Width="170"
+                                Margin="8,0,0,0"
+                                SelectedDate="{Binding FromDate}"
+                                materialDesign:HintAssist.Hint="من تاريخ"
+                                Style="{StaticResource ModernDatePickerStyle}" />
+                    <DatePicker Width="170"
+                                Margin="8,0,0,0"
+                                SelectedDate="{Binding ToDate}"
+                                materialDesign:HintAssist.Hint="إلى تاريخ"
+                                Style="{StaticResource ModernDatePickerStyle}" />
                     <Button Margin="8,0,0,0" Command="{Binding SearchCommand}" Style="{StaticResource SecondaryButtonStyle}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Margin="0,0,6,0" Kind="Magnify" />
                             <TextBlock Text="بحث" />
                         </StackPanel>
                     </Button>
+                    <Button Margin="8,0,0,0"
+                            Command="{Binding ClearFiltersCommand}"
+                            Content="مسح الفلاتر"
+                            Style="{StaticResource SecondaryButtonStyle}" />
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -69,10 +83,11 @@
                               SelectedItem="{Binding SelectedInvoice}"
                               Style="{StaticResource ModernDataGridStyle}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Width="170" Binding="{Binding InvoiceNumber}" Header="الفاتورة" />
                             <DataGridTextColumn Width="120" Binding="{Binding InvoiceDate}" Header="التاريخ" />
                             <DataGridTextColumn Width="110" Binding="{Binding Status}" Header="الحالة" />
-                            <DataGridTextColumn Width="130" Binding="{Binding NetTotalAmount, StringFormat=N2}" Header="الصافي" />
+                            <DataGridTextColumn Width="130" Binding="{Binding NetTotalAmount, StringFormat=F0}" Header="الصافي" />
+                            <DataGridTextColumn Width="130" Binding="{Binding PaidAmount, StringFormat=F0}" Header="المدفوع" />
+                            <DataGridTextColumn Width="130" Binding="{Binding RemainingAmount, StringFormat=F0}" Header="المتبقي" />
                         </DataGrid.Columns>
                     </DataGrid>
 

@@ -5,8 +5,13 @@ namespace AutoPartsPOS.Application.Inventory.Services;
 
 public sealed class InventoryLedgerService(IInventoryRepository inventoryRepository) : IInventoryLedgerService
 {
-    public Task<IReadOnlyList<InventoryTransactionDto>> SearchAsync(string? searchText, long? productId, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<InventoryTransactionDto>> SearchAsync(
+        string? searchText,
+        long? productId,
+        DateOnly? fromDate = null,
+        DateOnly? toDate = null,
+        CancellationToken cancellationToken = default)
     {
-        return inventoryRepository.SearchAsync(searchText, productId, cancellationToken);
+        return inventoryRepository.SearchAsync(searchText, productId, fromDate, toDate, cancellationToken);
     }
 }

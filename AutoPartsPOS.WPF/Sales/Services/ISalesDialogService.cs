@@ -6,5 +6,7 @@ public interface ISalesDialogService
 {
     Task<bool> ShowCreateDialogAsync();
 
-    Task ShowDetailsDialogAsync(SalesInvoiceDetailsDto invoice);
+    Task<bool> ShowDetailsDialogAsync(SalesInvoiceDetailsDto invoice);
+
+    Task<bool> ShowCancelConfirmationAsync();
 }

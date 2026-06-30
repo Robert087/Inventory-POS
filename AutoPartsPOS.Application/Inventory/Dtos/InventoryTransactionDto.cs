@@ -11,4 +11,7 @@ public sealed record InventoryTransactionDto(
     long ReferenceId,
     string ReferenceNumber,
     DateTimeOffset TransactionDate,
-    string? Notes);
+    string? Notes)
+{
+    public decimal DisplayQuantity => Math.Abs(Quantity);
+}

@@ -23,14 +23,13 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="{Binding Invoice.InvoiceNumber}" />
+                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="تفاصيل فاتورة الشراء" />
                     <TextBlock Margin="0,10,0,0" Text="{Binding Invoice.SupplierNameAr, StringFormat=المورد: {0}}" />
                     <TextBlock Text="{Binding Invoice.InvoiceDate, StringFormat=التاريخ: {0}}" />
-                    <TextBlock Text="{Binding Invoice.Status, StringFormat=الحالة: {0}}" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
-                    <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold" Text="{Binding Invoice.TotalAmount, StringFormat=الإجمالي: {0:N2}}" />
+                    <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold" Text="{Binding Invoice.TotalAmount, StringFormat=الإجمالي: {0:F0}}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -44,9 +43,9 @@
                       Style="{StaticResource ModernDataGridStyle}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="2*" Binding="{Binding ProductNameAr}" Header="الصنف" />
-                    <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=N3}" Header="الكمية" />
-                    <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=N2}" Header="سعر الوحدة" />
-                    <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=N2}" Header="الإجمالي" />
+                    <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=F0}" Header="الكمية" />
+                    <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=F0}" Header="سعر الوحدة" />
+                    <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=F0}" Header="الإجمالي" />
                 </DataGrid.Columns>
             </DataGrid>
 

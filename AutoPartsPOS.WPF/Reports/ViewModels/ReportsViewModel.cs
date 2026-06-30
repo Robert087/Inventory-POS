@@ -136,9 +136,9 @@ public sealed partial class ReportsViewModel(
         var term = SearchText.Trim();
         return Contains(item.ProductCode, term)
             || Contains(item.ProductNameAr, term)
-            || item.CurrentStock.ToString("N3", CultureInfo.CurrentCulture).Contains(term, StringComparison.CurrentCultureIgnoreCase)
+            || item.CurrentStock.ToString("F0", CultureInfo.CurrentCulture).Contains(term, StringComparison.CurrentCultureIgnoreCase)
             || item.CurrentAverageCost.ToString("N4", CultureInfo.CurrentCulture).Contains(term, StringComparison.CurrentCultureIgnoreCase)
-            || item.InventoryValue.ToString("N2", CultureInfo.CurrentCulture).Contains(term, StringComparison.CurrentCultureIgnoreCase);
+            || item.InventoryValue.ToString("F0", CultureInfo.CurrentCulture).Contains(term, StringComparison.CurrentCultureIgnoreCase);
     }
 
     private static bool Contains(string? source, string term) =>

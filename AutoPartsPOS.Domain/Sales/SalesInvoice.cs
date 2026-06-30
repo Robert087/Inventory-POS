@@ -12,11 +12,17 @@ public sealed class SalesInvoice : AuditableEntity
 
     public SalesInvoiceStatus Status { get; set; } = SalesInvoiceStatus.Posted;
 
+    public InvoicePaymentStatus PaymentStatus { get; set; } = InvoicePaymentStatus.Unpaid;
+
     public decimal SubtotalAmount { get; set; }
 
     public decimal DiscountAmount { get; set; }
 
     public decimal NetTotalAmount { get; set; }
+
+    public decimal PaidAmount { get; set; }
+
+    public decimal RemainingAmount { get; set; }
 
     public DateTimeOffset? VoidedAt { get; set; }
 

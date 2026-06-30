@@ -1,4 +1,5 @@
 ﻿using AutoPartsPOS.Domain.Sales;
+using AutoPartsPOS.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -33,6 +34,13 @@ public sealed class SalesInvoiceConfiguration : IEntityTypeConfiguration<SalesIn
             .HasMaxLength(30)
             .IsRequired();
 
+        builder.Property(invoice => invoice.PaymentStatus)
+            .HasColumnName("payment_status")
+            .HasConversion<string>()
+            .HasMaxLength(30)
+            .HasDefaultValue(InvoicePaymentStatus.Unpaid)
+            .IsRequired();
+
         builder.Property(invoice => invoice.SubtotalAmount)
             .HasColumnName("subtotal_amount")
             .HasPrecision(14, 2)
@@ -45,6 +53,16 @@ public sealed class SalesInvoiceConfiguration : IEntityTypeConfiguration<SalesIn
 
         builder.Property(invoice => invoice.NetTotalAmount)
             .HasColumnName("net_total_amount")
+            .HasPrecision(14, 2)
+            .IsRequired();
+
+        builder.Property(invoice => invoice.PaidAmount)
+            .HasColumnName("paid_amount")
+            .HasPrecision(14, 2)
+            .IsRequired();
+
+        builder.Property(invoice => invoice.RemainingAmount)
+            .HasColumnName("remaining_amount")
             .HasPrecision(14, 2)
             .IsRequired();
 
@@ -89,6 +107,8 @@ public sealed class SalesInvoiceConfiguration : IEntityTypeConfiguration<SalesIn
             table.HasCheckConstraint("ck_sales_invoices_amounts_non_negative", "subtotal_amount >= 0 AND discount_amount >= 0 AND net_total_amount >= 0");
             table.HasCheckConstraint("ck_sales_invoices_net_total_valid", "net_total_amount = subtotal_amount - discount_amount");
             table.HasCheckConstraint("ck_sales_invoices_status", "status IN ('Posted', 'Voided')");
+            table.HasCheckConstraint("ck_sales_invoices_payment_status", "payment_status IN ('Paid', 'Unpaid', 'PartiallyPaid')");
+            table.HasCheckConstraint("ck_sales_invoices_payment_amounts", "paid_amount >= 0 AND remaining_amount >= 0 AND paid_amount + remaining_amount = net_total_amount");
         });
     }
 }

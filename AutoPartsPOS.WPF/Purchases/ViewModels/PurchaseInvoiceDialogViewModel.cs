@@ -5,6 +5,7 @@ using AutoPartsPOS.Application.Purchases.Interfaces;
 using AutoPartsPOS.Application.Suppliers.Dtos;
 using AutoPartsPOS.Application.Suppliers.Interfaces;
 using AutoPartsPOS.WPF.Catalog.ViewModels;
+using AutoPartsPOS.WPF.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -38,10 +39,10 @@ public sealed partial class PurchaseInvoiceDialogViewModel(
     private ProductDto? _selectedProduct;
 
     [ObservableProperty]
-    private decimal _quantity = 1;
+    private string? _quantityText;
 
     [ObservableProperty]
-    private decimal _unitPrice;
+    private string? _unitPriceText;
 
     [ObservableProperty]
     private PurchaseInvoiceLineViewModel? _selectedLine;
@@ -54,6 +55,8 @@ public sealed partial class PurchaseInvoiceDialogViewModel(
         InvoiceNumber = $"PUR-{DateTime.Now:yyyyMMdd-HHmmss}";
         InvoiceDate = DateTime.Today;
         Notes = null;
+        QuantityText = null;
+        UnitPriceText = null;
         Lines.Clear();
         Suppliers.Clear();
         Products.Clear();
@@ -89,27 +92,39 @@ public sealed partial class PurchaseInvoiceDialogViewModel(
             return;
         }
 
-        if (Quantity <= 0)
+        if (!WholeNumberInput.TryParseRequiredPositive(
+                QuantityText,
+                out var quantity,
+                out var quantityError,
+                "الكمية مطلوبة",
+                "الكمية يجب أن تكون أكبر من صفر",
+                "الكمية يجب أن تكون عدداً صحيحاً"))
         {
-            ErrorMessage = "الكمية يجب أن تكون أكبر من صفر.";
+            ErrorMessage = quantityError;
             return;
         }
 
-        if (UnitPrice < 0)
+        if (!WholeNumberInput.TryParseRequiredPositive(
+                UnitPriceText,
+                out var unitPrice,
+                out var unitPriceError,
+                "سعر الوحدة مطلوب",
+                "سعر الوحدة يجب أن يكون أكبر من صفر",
+                "سعر الوحدة يجب أن يكون عدداً صحيحاً"))
         {
-            ErrorMessage = "سعر الوحدة لا يمكن أن يكون أقل من صفر.";
+            ErrorMessage = unitPriceError;
             return;
         }
 
-        var existingLine = Lines.FirstOrDefault(line => line.Product?.Id == SelectedProduct.Id && line.UnitPrice == UnitPrice);
+        var existingLine = Lines.FirstOrDefault(line => line.Product?.Id == SelectedProduct.Id && line.UnitPrice == unitPrice);
 
         if (existingLine is null)
         {
             var line = new PurchaseInvoiceLineViewModel
             {
                 Product = SelectedProduct,
-                Quantity = Quantity,
-                UnitPrice = UnitPrice
+                Quantity = quantity,
+                UnitPrice = unitPrice
             };
 
             line.PropertyChanged += (_, _) => OnPropertyChanged(nameof(InvoiceTotal));
@@ -117,11 +132,11 @@ public sealed partial class PurchaseInvoiceDialogViewModel(
         }
         else
         {
-            existingLine.Quantity += Quantity;
+            existingLine.Quantity += quantity;
         }
 
         ErrorMessage = null;
-        Quantity = 1;
+        QuantityText = null;
         OnPropertyChanged(nameof(InvoiceTotal));
     }
 
@@ -181,9 +196,14 @@ public sealed partial class PurchaseInvoiceDialogViewModel(
 
     private void ApplySelectedProductPrice()
     {
-        if (SelectedProduct is not null)
+        if (SelectedProduct is null)
         {
-            UnitPrice = SelectedProduct.PurchasePrice;
+            UnitPriceText = null;
+            return;
         }
+
+        UnitPriceText = SelectedProduct.PurchasePrice > 0
+            ? WholeNumberInput.Format(SelectedProduct.PurchasePrice)
+            : null;
     }
 }

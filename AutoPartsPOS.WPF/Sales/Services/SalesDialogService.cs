@@ -22,7 +22,7 @@ public sealed class SalesDialogService(IServiceProvider serviceProvider) : ISale
         return dialog.ShowDialog() == true;
     }
 
-    public Task ShowDetailsDialogAsync(SalesInvoiceDetailsDto invoice)
+    public Task<bool> ShowDetailsDialogAsync(SalesInvoiceDetailsDto invoice)
     {
         var viewModel = serviceProvider.GetRequiredService<SalesInvoiceDetailsViewModel>();
         viewModel.Load(invoice);
@@ -34,7 +34,16 @@ public sealed class SalesDialogService(IServiceProvider serviceProvider) : ISale
         };
 
         viewModel.RequestClose += (_, result) => dialog.DialogResult = result;
-        dialog.ShowDialog();
-        return Task.CompletedTask;
+        return Task.FromResult(dialog.ShowDialog() == true);
+    }
+
+    public Task<bool> ShowCancelConfirmationAsync()
+    {
+        var dialog = new SalesInvoiceCancelConfirmationDialog
+        {
+            Owner = serviceProvider.GetRequiredService<MainWindow>()
+        };
+
+        return Task.FromResult(dialog.ShowDialog() == true);
     }
 }

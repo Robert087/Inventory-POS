@@ -51,9 +51,9 @@
                     <StackPanel Margin="0,16,0,0">
                         <UniformGrid Columns="4">
                             <Border Margin="0,0,10,0" Padding="16" Background="#F8FAFC" CornerRadius="10"><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="عدد الفواتير" /><TextBlock Margin="0,8,0,0" FontSize="22" FontWeight="Bold" Text="{Binding SalesReport.InvoiceCount}" /></StackPanel></Border>
-                            <Border Margin="0,0,10,0" Padding="16" Background="#F8FAFC" CornerRadius="10"><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="إجمالي المبيعات" /><TextBlock Margin="0,8,0,0" FontSize="22" FontWeight="Bold" Text="{Binding SalesReport.TotalSales, StringFormat=N2}" /></StackPanel></Border>
-                            <Border Margin="0,0,10,0" Padding="16" Background="#FFF7ED" CornerRadius="10"><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="إجمالي الخصم" /><TextBlock Margin="0,8,0,0" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource AppWarningBrush}" Text="{Binding SalesReport.TotalDiscount, StringFormat=N2}" /></StackPanel></Border>
-                            <Border Padding="16" Background="#ECFDF3" CornerRadius="10"><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="صافي المبيعات" /><TextBlock Margin="0,8,0,0" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource AppSuccessBrush}" Text="{Binding SalesReport.NetSales, StringFormat=N2}" /></StackPanel></Border>
+                            <Border Margin="0,0,10,0" Padding="16" Background="#F8FAFC" CornerRadius="10"><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="إجمالي المبيعات" /><TextBlock Margin="0,8,0,0" FontSize="22" FontWeight="Bold" Text="{Binding SalesReport.TotalSales, StringFormat=F0}" /></StackPanel></Border>
+                            <Border Margin="0,0,10,0" Padding="16" Background="#FFF7ED" CornerRadius="10"><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="إجمالي الخصم" /><TextBlock Margin="0,8,0,0" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource AppWarningBrush}" Text="{Binding SalesReport.TotalDiscount, StringFormat=F0}" /></StackPanel></Border>
+                            <Border Padding="16" Background="#ECFDF3" CornerRadius="10"><StackPanel><TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="صافي المبيعات" /><TextBlock Margin="0,8,0,0" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource AppSuccessBrush}" Text="{Binding SalesReport.NetSales, StringFormat=F0}" /></StackPanel></Border>
                         </UniformGrid>
                         <StackPanel Margin="0,22,0,0" Orientation="Horizontal">
                             <Button Command="{Binding ExportSalesPdfCommand}" Style="{StaticResource SecondaryButtonStyle}">
@@ -75,9 +75,9 @@
                 <TabItem Header="الأرباح">
                     <StackPanel Margin="0,16,0,0">
                         <UniformGrid Columns="3">
-                            <Border Margin="0,0,10,0" Padding="20" Background="#EFF6FF" CornerRadius="10"><StackPanel><TextBlock Text="الإيرادات" /><TextBlock Margin="0,10,0,0" FontSize="24" FontWeight="Bold" Text="{Binding ProfitReport.Revenue, StringFormat=N2}" /></StackPanel></Border>
-                            <Border Margin="0,0,10,0" Padding="20" Background="#FFF7ED" CornerRadius="10"><StackPanel><TextBlock Text="التكلفة" /><TextBlock Margin="0,10,0,0" FontSize="24" FontWeight="Bold" Text="{Binding ProfitReport.Cost, StringFormat=N2}" /></StackPanel></Border>
-                            <Border Padding="20" Background="#ECFDF3" CornerRadius="10"><StackPanel><TextBlock Text="صافي الربح" /><TextBlock Margin="0,10,0,0" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppSuccessBrush}" Text="{Binding ProfitReport.Profit, StringFormat=N2}" /></StackPanel></Border>
+                            <Border Margin="0,0,10,0" Padding="20" Background="#EFF6FF" CornerRadius="10"><StackPanel><TextBlock Text="الإيرادات" /><TextBlock Margin="0,10,0,0" FontSize="24" FontWeight="Bold" Text="{Binding ProfitReport.Revenue, StringFormat=F0}" /></StackPanel></Border>
+                            <Border Margin="0,0,10,0" Padding="20" Background="#FFF7ED" CornerRadius="10"><StackPanel><TextBlock Text="التكلفة" /><TextBlock Margin="0,10,0,0" FontSize="24" FontWeight="Bold" Text="{Binding ProfitReport.Cost, StringFormat=F0}" /></StackPanel></Border>
+                            <Border Padding="20" Background="#ECFDF3" CornerRadius="10"><StackPanel><TextBlock Text="صافي الربح" /><TextBlock Margin="0,10,0,0" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppSuccessBrush}" Text="{Binding ProfitReport.Profit, StringFormat=F0}" /></StackPanel></Border>
                         </UniformGrid>
                         <StackPanel Margin="0,22,0,0" Orientation="Horizontal">
                             <Button Command="{Binding ExportProfitPdfCommand}" Style="{StaticResource SecondaryButtonStyle}" Content="تصدير PDF" />
@@ -89,8 +89,8 @@
                 <TabItem Header="المخزون">
                     <StackPanel Margin="0,16,0,0">
                         <UniformGrid Columns="3">
-                            <Border Margin="0,0,10,0" Padding="16" Background="#F8FAFC" CornerRadius="10"><TextBlock Text="{Binding InventoryReport.TotalStockQuantity, StringFormat=إجمالي الكمية: {0:N3}}" /></Border>
-                            <Border Margin="0,0,10,0" Padding="16" Background="#F8FAFC" CornerRadius="10"><TextBlock Text="{Binding InventoryReport.InventoryValue, StringFormat=قيمة المخزون: {0:N2}}" /></Border>
+                            <Border Margin="0,0,10,0" Padding="16" Background="#F8FAFC" CornerRadius="10"><TextBlock Text="{Binding InventoryReport.TotalStockQuantity, StringFormat=إجمالي الكمية: {0:F0}}" /></Border>
+                            <Border Margin="0,0,10,0" Padding="16" Background="#F8FAFC" CornerRadius="10"><TextBlock Text="{Binding InventoryReport.InventoryValue, StringFormat=قيمة المخزون: {0:F0}}" /></Border>
                             <Border Padding="16" Background="#FFF7ED" CornerRadius="10"><TextBlock Text="{Binding InventoryReport.LowStockCount, StringFormat=عناصر منخفضة: {0}}" /></Border>
                         </UniformGrid>
 
@@ -116,9 +116,9 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Width="120" Header="الكود" Binding="{Binding ProductCode}" />
                                     <DataGridTextColumn Width="*" Header="الصنف" Binding="{Binding ProductNameAr}" />
-                                    <DataGridTextColumn Width="120" Header="الرصيد" Binding="{Binding CurrentStock, StringFormat=N3}" />
-                                    <DataGridTextColumn Width="130" Header="متوسط التكلفة" Binding="{Binding CurrentAverageCost, StringFormat=N4}" />
-                                    <DataGridTextColumn Width="140" Header="قيمة المخزون" Binding="{Binding InventoryValue, StringFormat=N2}" />
+                                    <DataGridTextColumn Width="120" Header="الرصيد" Binding="{Binding CurrentStock, StringFormat=F0}" />
+                                    <DataGridTextColumn Width="130" Header="متوسط التكلفة" Binding="{Binding CurrentAverageCost, StringFormat=F0}" />
+                                    <DataGridTextColumn Width="140" Header="قيمة المخزون" Binding="{Binding InventoryValue, StringFormat=F0}" />
                                     <DataGridCheckBoxColumn Width="90" Header="منخفض" Binding="{Binding IsLowStock}" />
                                 </DataGrid.Columns>
                             </DataGrid>

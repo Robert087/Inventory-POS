@@ -34,24 +34,22 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="12" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="12" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <TextBox x:Name="InvoiceNumberTextBox"
-                         Grid.Column="0"
-                         materialDesign:HintAssist.Hint="رقم الفاتورة"
-                         Style="{StaticResource ModernTextBoxStyle}"
-                         TabIndex="0"
-                         Text="{Binding InvoiceNumber, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
-                <DatePicker Grid.Column="2"
+                <DatePicker Grid.Column="0"
                             SelectedDate="{Binding InvoiceDate}"
                             materialDesign:HintAssist.Hint="التاريخ"
                             Style="{StaticResource ModernDatePickerStyle}"
-                            TabIndex="1" />
-                <TextBox Grid.Column="4"
+                            TabIndex="0" />
+                <TextBox Grid.Column="2"
+                         DataObject.Pasting="WholeNumberTextBox_Pasting"
+                         PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
                          materialDesign:HintAssist.Hint="الخصم"
                          Style="{StaticResource ModernTextBoxStyle}"
-                         TabIndex="2"
-                         Text="{Binding DiscountAmount, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, StringFormat=N2}" />
+                         TabIndex="1"
+                         Text="{Binding DiscountAmountText, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
                 <TextBox Grid.Row="2"
                          Grid.Column="0"
                          Grid.ColumnSpan="5"
@@ -62,6 +60,30 @@
                          Style="{StaticResource ModernTextBoxStyle}"
                          TabIndex="3"
                          Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" />
+
+                <ComboBox Grid.Row="4"
+                          Grid.Column="0"
+                          DisplayMemberPath="Value"
+                          ItemsSource="{Binding PaymentStatuses}"
+                          SelectedValue="{Binding SelectedPaymentStatus, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedValuePath="Key"
+                          materialDesign:HintAssist.Hint="حالة الدفع"
+                          Style="{StaticResource ModernComboBoxStyle}" />
+                <TextBox Grid.Row="4"
+                         Grid.Column="2"
+                         DataObject.Pasting="WholeNumberTextBox_Pasting"
+                         PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                         IsEnabled="{Binding IsPartiallyPaid}"
+                         materialDesign:HintAssist.Hint="المبلغ المدفوع"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding PaidAmountText, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+                <TextBox Grid.Row="4"
+                         Grid.Column="4"
+                         IsEnabled="False"
+                         IsReadOnly="True"
+                         materialDesign:HintAssist.Hint="المبلغ المتبقي"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding RemainingAmount, StringFormat=F0}" />
             </Grid>
         </Border>
 
@@ -98,14 +120,18 @@
                              materialDesign:HintAssist.Hint="الكمية"
                              Style="{StaticResource ModernTextBoxStyle}"
                              TabIndex="5"
-                             Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat=N3}" />
+                             DataObject.Pasting="WholeNumberTextBox_Pasting"
+                             PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                             Text="{Binding QuantityText, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBox x:Name="UnitPriceTextBox"
                              Grid.Column="2"
                              Margin="8,0,0,0"
                              materialDesign:HintAssist.Hint="سعر الوحدة"
                              Style="{StaticResource ModernTextBoxStyle}"
                              TabIndex="6"
-                             Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
+                             DataObject.Pasting="WholeNumberTextBox_Pasting"
+                             PreviewTextInput="WholeNumberTextBox_PreviewTextInput"
+                             Text="{Binding UnitPriceText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button x:Name="AddLineButton"
                             Grid.Column="3"
                             Margin="8,0,0,0"
@@ -140,9 +166,9 @@
                           Style="{StaticResource ModernDataGridStyle}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Width="2*" Binding="{Binding Product.NameAr}" Header="الصنف" />
-                        <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=N3}" Header="الكمية" />
-                        <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=N2}" Header="سعر الوحدة" />
-                        <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=N2}" Header="الإجمالي" />
+                        <DataGridTextColumn Width="120" Binding="{Binding Quantity, StringFormat=F0}" Header="الكمية" />
+                        <DataGridTextColumn Width="120" Binding="{Binding UnitPrice, StringFormat=F0}" Header="سعر الوحدة" />
+                        <DataGridTextColumn Width="140" Binding="{Binding TotalPrice, StringFormat=F0}" Header="الإجمالي" />
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -185,9 +211,9 @@
             </StackPanel>
 
             <StackPanel>
-                <TextBlock HorizontalAlignment="Right" Text="{Binding Subtotal, StringFormat=الإجمالي: {0:N2}}" />
-                <TextBlock HorizontalAlignment="Right" Text="{Binding DiscountAmount, StringFormat=الخصم: {0:N2}}" />
-                <TextBlock HorizontalAlignment="Right" FontSize="18" FontWeight="SemiBold" Text="{Binding NetTotal, StringFormat=الصافي: {0:N2}}" />
+                <TextBlock HorizontalAlignment="Right" Text="{Binding Subtotal, StringFormat=الإجمالي: {0:F0}}" />
+                <TextBlock HorizontalAlignment="Right" Text="{Binding DiscountDisplay, StringFormat=الخصم: {0:F0}}" />
+                <TextBlock HorizontalAlignment="Right" FontSize="18" FontWeight="SemiBold" Text="{Binding NetTotal, StringFormat=الصافي: {0:F0}}" />
                 <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource MaterialDesignValidationErrorBrush}" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
             </StackPanel>
         </DockPanel>

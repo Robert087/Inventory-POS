@@ -14,7 +14,7 @@ public sealed class SalesInvoicePrintService(IApplicationSettingsService setting
         var document = await CreatePreviewDocumentAsync(invoice, cancellationToken);
         var previewWindow = new Window
         {
-            Title = $"معاينة فاتورة {invoice.InvoiceNumber}",
+            Title = $"معاينة فاتورة بيع",
             Width = 900,
             Height = 700,
             FlowDirection = FlowDirection.RightToLeft,
@@ -36,7 +36,7 @@ public sealed class SalesInvoicePrintService(IApplicationSettingsService setting
 
         if (printDialog.ShowDialog() == true)
         {
-            printDialog.PrintDocument(((IDocumentPaginatorSource)document).DocumentPaginator, $"فاتورة بيع {invoice.InvoiceNumber}");
+            printDialog.PrintDocument(((IDocumentPaginatorSource)document).DocumentPaginator, "فاتورة بيع");
         }
     }
 
@@ -64,7 +64,7 @@ public sealed class SalesInvoicePrintService(IApplicationSettingsService setting
             TextAlignment = TextAlignment.Center
         });
 
-        document.Blocks.Add(new Paragraph(new Run($"فاتورة بيع رقم: {invoice.InvoiceNumber}"))
+        document.Blocks.Add(new Paragraph(new Run("فاتورة بيع"))
         {
             FontSize = 18,
             FontWeight = FontWeights.SemiBold,
@@ -97,16 +97,16 @@ public sealed class SalesInvoicePrintService(IApplicationSettingsService setting
             AddRow(
                 rowGroup,
                 item.ProductNameAr,
-                item.Quantity.ToString("N3"),
-                $"{item.UnitPrice:N2} {settings.CurrencySymbol}",
-                $"{item.TotalPrice:N2} {settings.CurrencySymbol}",
+                item.Quantity.ToString("F0"),
+                $"{item.UnitPrice:F0} {settings.CurrencySymbol}",
+                $"{item.TotalPrice:F0} {settings.CurrencySymbol}",
                 false);
         }
 
         document.Blocks.Add(table);
-        document.Blocks.Add(new Paragraph(new Run($"الإجمالي قبل الخصم: {invoice.SubtotalAmount:N2} {settings.CurrencySymbol}")) { TextAlignment = TextAlignment.Left });
-        document.Blocks.Add(new Paragraph(new Run($"الخصم: {invoice.DiscountAmount:N2} {settings.CurrencySymbol}")) { TextAlignment = TextAlignment.Left });
-        document.Blocks.Add(new Paragraph(new Run($"الصافي: {invoice.NetTotalAmount:N2} {settings.CurrencySymbol}"))
+        document.Blocks.Add(new Paragraph(new Run($"الإجمالي قبل الخصم: {invoice.SubtotalAmount:F0} {settings.CurrencySymbol}")) { TextAlignment = TextAlignment.Left });
+        document.Blocks.Add(new Paragraph(new Run($"الخصم: {invoice.DiscountAmount:F0} {settings.CurrencySymbol}")) { TextAlignment = TextAlignment.Left });
+        document.Blocks.Add(new Paragraph(new Run($"الصافي: {invoice.NetTotalAmount:F0} {settings.CurrencySymbol}"))
         {
             FontWeight = FontWeights.Bold,
             FontSize = 16,

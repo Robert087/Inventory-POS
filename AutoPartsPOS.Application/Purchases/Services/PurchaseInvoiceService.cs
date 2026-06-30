@@ -248,10 +248,18 @@ public sealed class PurchaseInvoiceService(
             {
                 AddError(errors, $"{nameof(CreatePurchaseInvoiceDto.Items)}[{index}].{nameof(CreatePurchaseInvoiceItemDto.Quantity)}", "الكمية يجب أن تكون أكبر من صفر.");
             }
+            else if (item.Quantity != decimal.Truncate(item.Quantity))
+            {
+                AddError(errors, $"{nameof(CreatePurchaseInvoiceDto.Items)}[{index}].{nameof(CreatePurchaseInvoiceItemDto.Quantity)}", "الكمية يجب أن تكون عدداً صحيحاً.");
+            }
 
             if (item.UnitPrice < 0)
             {
                 AddError(errors, $"{nameof(CreatePurchaseInvoiceDto.Items)}[{index}].{nameof(CreatePurchaseInvoiceItemDto.UnitPrice)}", "سعر الوحدة لا يمكن أن يكون أقل من صفر.");
+            }
+            else if (item.UnitPrice != decimal.Truncate(item.UnitPrice))
+            {
+                AddError(errors, $"{nameof(CreatePurchaseInvoiceDto.Items)}[{index}].{nameof(CreatePurchaseInvoiceItemDto.UnitPrice)}", "سعر الوحدة يجب أن يكون عدداً صحيحاً.");
             }
         }
 

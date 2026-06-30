@@ -42,7 +42,7 @@
 
                 <StackPanel Margin="0,14,0,0" Orientation="Horizontal">
                     <TextBox Width="320"
-                             materialDesign:HintAssist.Hint="ابحث برقم الفاتورة أو اسم المورد"
+                             materialDesign:HintAssist.Hint="ابحث باسم المورد"
                              Style="{StaticResource ModernTextBoxStyle}"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Margin="8,0,0,0" Command="{Binding SearchCommand}" Style="{StaticResource SecondaryButtonStyle}">
@@ -69,11 +69,9 @@
                               SelectedItem="{Binding SelectedInvoice}"
                               Style="{StaticResource ModernDataGridStyle}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Width="170" Binding="{Binding InvoiceNumber}" Header="الفاتورة" />
                             <DataGridTextColumn Width="180" Binding="{Binding SupplierNameAr}" Header="المورد" />
                             <DataGridTextColumn Width="120" Binding="{Binding InvoiceDate}" Header="التاريخ" />
-                            <DataGridTextColumn Width="110" Binding="{Binding Status}" Header="الحالة" />
-                            <DataGridTextColumn Width="130" Binding="{Binding TotalAmount, StringFormat=N2}" Header="الإجمالي" />
+                            <DataGridTextColumn Width="130" Binding="{Binding TotalAmount, StringFormat=F0}" Header="الإجمالي" />
                         </DataGrid.Columns>
                     </DataGrid>
 
