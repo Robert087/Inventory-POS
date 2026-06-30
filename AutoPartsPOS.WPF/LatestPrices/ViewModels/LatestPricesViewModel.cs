@@ -45,7 +45,28 @@ public sealed partial class LatestPricesViewModel(
     [RelayCommand(CanExecute = nameof(HasSelectedLatestPrice))]
     private async Task EditAsync()
     {
-        if (SelectedLatestPrice is not null && await dialogService.ShowLatestPriceDialogAsync(SelectedLatestPrice))
+        if (SelectedLatestPrice is null)
+        {
+            return;
+        }
+
+        await EditLatestPriceAsync(SelectedLatestPrice);
+    }
+
+    [RelayCommand]
+    private async Task EditRowAsync(LatestPriceDto? latestPrice)
+    {
+        if (latestPrice is null)
+        {
+            return;
+        }
+
+        await EditLatestPriceAsync(latestPrice);
+    }
+
+    private async Task EditLatestPriceAsync(LatestPriceDto latestPrice)
+    {
+        if (await dialogService.ShowLatestPriceDialogAsync(latestPrice))
         {
             await LoadAsync();
         }

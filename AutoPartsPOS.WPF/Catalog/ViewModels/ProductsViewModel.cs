@@ -54,7 +54,28 @@ public sealed partial class ProductsViewModel(
     [RelayCommand(CanExecute = nameof(HasSelectedProduct))]
     private async Task EditAsync()
     {
-        if (SelectedProduct is not null && await dialogService.ShowProductDialogAsync(SelectedProduct))
+        if (SelectedProduct is null)
+        {
+            return;
+        }
+
+        await EditProductAsync(SelectedProduct);
+    }
+
+    [RelayCommand]
+    private async Task EditRowAsync(ProductDto? product)
+    {
+        if (product is null)
+        {
+            return;
+        }
+
+        await EditProductAsync(product);
+    }
+
+    private async Task EditProductAsync(ProductDto product)
+    {
+        if (await dialogService.ShowProductDialogAsync(product))
         {
             await LoadCategoriesAsync();
             await LoadAsync();

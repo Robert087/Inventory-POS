@@ -4,15 +4,6 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              FlowDirection="RightToLeft"
              Language="ar-EG">
-    <UserControl.Resources>
-        <Style x:Key="InvoiceGridActionButtonStyle"
-               BasedOn="{StaticResource SecondaryButtonStyle}"
-               TargetType="Button">
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Padding" Value="10,2" />
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        </Style>
-    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -137,10 +128,7 @@
                             </DataGridTextColumn>
                             <DataGridTemplateColumn Width="100" Header="إجراءات">
                                 <DataGridTemplateColumn.CellStyle>
-                                    <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
-                                        <Setter Property="VerticalContentAlignment" Value="Center" />
-                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                    </Style>
+                                    <Style BasedOn="{StaticResource DataGridActionCellStyle}" TargetType="DataGridCell" />
                                 </DataGridTemplateColumn.CellStyle>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -149,7 +137,7 @@
                                                 Command="{Binding DataContext.ViewRowCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                 CommandParameter="{Binding}"
                                                 Content="عرض"
-                                                Style="{StaticResource InvoiceGridActionButtonStyle}" />
+                                                Style="{StaticResource DataGridActionButtonStyle}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

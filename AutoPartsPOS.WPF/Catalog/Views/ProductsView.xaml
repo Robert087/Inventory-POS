@@ -74,15 +74,74 @@
                               CanUserDeleteRows="False"
                               IsReadOnly="True"
                               ItemsSource="{Binding Products}"
+                              RowHeight="48"
                               SelectedItem="{Binding SelectedProduct}"
                               Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="8,0" />
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Width="130" Binding="{Binding ProductCode}" Header="الكود" />
-                            <DataGridTextColumn Width="2*" Binding="{Binding NameAr}" Header="الصنف" />
-                            <DataGridTextColumn Width="160" Binding="{Binding CategoryNameAr}" Header="التصنيف" />
-                            <DataGridTextColumn Width="120" Binding="{Binding CurrentAverageCost, StringFormat=F0}" Header="سعر الشراء" />
-                            <DataGridTextColumn Width="120" Binding="{Binding SellingPrice, StringFormat=F0}" Header="سعر البيع" />
-                            <DataGridTextColumn Width="120" Binding="{Binding CurrentStock, StringFormat=F0}" Header="الرصيد" />
+                            <DataGridTextColumn Width="130" Binding="{Binding ProductCode}" Header="الكود">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="2*" Binding="{Binding NameAr}" Header="الصنف">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="160" Binding="{Binding CategoryNameAr}" Header="التصنيف">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="120" Binding="{Binding CurrentAverageCost, StringFormat=F0}" Header="سعر الشراء">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="120" Binding="{Binding SellingPrice, StringFormat=F0}" Header="سعر البيع">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="120" Binding="{Binding CurrentStock, StringFormat=F0}" Header="الرصيد">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Width="100" Header="إجراءات">
+                                <DataGridTemplateColumn.CellStyle>
+                                    <Style BasedOn="{StaticResource DataGridActionCellStyle}" TargetType="DataGridCell" />
+                                </DataGridTemplateColumn.CellStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding DataContext.EditRowCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Content="تعديل"
+                                                Style="{StaticResource DataGridActionButtonStyle}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 

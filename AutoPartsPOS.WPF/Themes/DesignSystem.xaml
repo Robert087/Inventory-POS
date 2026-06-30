@@ -140,6 +140,33 @@
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8" />
     </Style>
 
+    <Style x:Key="DataGridActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+        <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="10,2" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource AppHoverBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="DataGridDangerActionButtonStyle"
+           BasedOn="{StaticResource DataGridActionButtonStyle}"
+           TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource AppDangerBrush}" />
+    </Style>
+
+    <Style x:Key="DataGridActionCellStyle" BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    </Style>
+
     <Style x:Key="IconButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
         <Setter Property="Width" Value="42" />
         <Setter Property="Height" Value="42" />
@@ -229,8 +256,8 @@
         <Setter Property="HeadersVisibility" Value="Column" />
         <Setter Property="RowBackground" Value="White" />
         <Setter Property="AlternatingRowBackground" Value="#FBFCFE" />
-        <Setter Property="GridLinesVisibility" Value="Horizontal" />
-        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource AppBorderBrush}" />
+        <Setter Property="GridLinesVisibility" Value="None" />
+        <Setter Property="HorizontalGridLinesBrush" Value="Transparent" />
         <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
         <Setter Property="RowHeight" Value="46" />
         <Setter Property="ColumnHeaderHeight" Value="46" />
@@ -270,6 +297,7 @@
 
     <Style TargetType="DataGridRow">
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -303,6 +331,7 @@
 
     <Style TargetType="DataGridCell">
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Padding" Value="12,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -314,10 +343,13 @@
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
                 <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="BorderBrush" Value="Transparent" />
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
             </Trigger>
             <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="BorderBrush" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
             </Trigger>
         </Style.Triggers>

@@ -60,10 +60,24 @@
                     <DataGrid x:Name="CategoriesGrid"
                               IsReadOnly="True"
                               ItemsSource="{Binding Categories}"
+                              RowHeight="48"
                               SelectedItem="{Binding SelectedCategory}"
                               Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="8,0" />
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Width="*" Binding="{Binding NameAr}" Header="اسم التصنيف" />
+                            <DataGridTextColumn Width="*" Binding="{Binding NameAr}" Header="اسم التصنيف">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 

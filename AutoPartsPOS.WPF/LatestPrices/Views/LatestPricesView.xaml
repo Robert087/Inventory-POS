@@ -60,14 +60,55 @@
                     <DataGrid x:Name="LatestPricesGrid"
                               IsReadOnly="True"
                               ItemsSource="{Binding LatestPrices}"
+                              RowHeight="48"
                               SelectedItem="{Binding SelectedLatestPrice}"
                               Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="8,0" />
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Width="160" Binding="{Binding ProductCode}" Header="الكود" />
-                            <DataGridTextColumn Width="*" Binding="{Binding NameAr}" Header="اسم الصنف" />
+                            <DataGridTextColumn Width="160" Binding="{Binding ProductCode}" Header="الكود">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="*" Binding="{Binding NameAr}" Header="اسم الصنف">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             <DataGridTextColumn Width="180"
                                                 Binding="{Binding LatestPurchasePrice, StringFormat={}{0:F0}}"
-                                                Header="أحدث سعر شراء" />
+                                                Header="أحدث سعر شراء">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Width="100" Header="إجراءات">
+                                <DataGridTemplateColumn.CellStyle>
+                                    <Style BasedOn="{StaticResource DataGridActionCellStyle}" TargetType="DataGridCell" />
+                                </DataGridTemplateColumn.CellStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding DataContext.EditRowCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Content="تعديل"
+                                                Style="{StaticResource DataGridActionButtonStyle}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 
