@@ -4,6 +4,8 @@
              xmlns:catalogConverters="clr-namespace:AutoPartsPOS.WPF.Catalog.Converters"
              xmlns:catalogViews="clr-namespace:AutoPartsPOS.WPF.Catalog.Views"
              xmlns:catalogViewModels="clr-namespace:AutoPartsPOS.WPF.Catalog.ViewModels"
+             xmlns:backupViews="clr-namespace:AutoPartsPOS.WPF.Backups.Views"
+             xmlns:backupViewModels="clr-namespace:AutoPartsPOS.WPF.Backups.ViewModels"
              xmlns:converters="clr-namespace:AutoPartsPOS.WPF.Converters"
              xmlns:homeExpensesViews="clr-namespace:AutoPartsPOS.WPF.HomeExpenses.Views"
              xmlns:homeExpensesViewModels="clr-namespace:AutoPartsPOS.WPF.HomeExpenses.ViewModels"
@@ -61,6 +63,10 @@
 
             <DataTemplate DataType="{x:Type settingsViewModels:AppSettingsViewModel}">
                 <settingsViews:AppSettingsView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type backupViewModels:BackupsViewModel}">
+                <backupViews:BackupsView />
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type purchaseViewModels:PurchaseInvoicesViewModel}">

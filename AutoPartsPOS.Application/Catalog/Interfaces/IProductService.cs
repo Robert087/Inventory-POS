@@ -16,4 +16,6 @@ public interface IProductService
     Task<OperationResult> ReplenishStockAsync(ReplenishProductStockDto dto, CancellationToken cancellationToken = default);
 
     Task<OperationResult> DeactivateAsync(long id, CancellationToken cancellationToken = default);
+
+    Task<OperationResult> DeleteAsync(long id, CancellationToken cancellationToken = default);
 }

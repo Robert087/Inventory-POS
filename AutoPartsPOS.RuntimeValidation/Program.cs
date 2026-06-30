@@ -366,6 +366,12 @@ internal static class Program
             Task.FromResult(false);
 
         public Task AddAsync(ProductCategory category, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task<bool> HasProductsAsync(long id, CancellationToken cancellationToken = default) => Task.FromResult(false);
+
+        public void Delete(ProductCategory category)
+        {
+        }
     }
 
     private sealed class FakeProductRepository : IProductRepository
@@ -417,6 +423,10 @@ internal static class Program
             Products.Add(product);
             return Task.CompletedTask;
         }
+
+        public Task<bool> HasReferencesAsync(long id, CancellationToken cancellationToken = default) => Task.FromResult(false);
+
+        public void Delete(Product product) => Products.Remove(product);
     }
 
     private sealed class FakeSupplierRepository(Supplier supplier) : ISupplierRepository
@@ -431,6 +441,12 @@ internal static class Program
             Task.FromResult(false);
 
         public Task AddAsync(Supplier entity, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task<bool> HasPurchaseInvoicesAsync(long id, CancellationToken cancellationToken = default) => Task.FromResult(false);
+
+        public void Delete(Supplier entity)
+        {
+        }
     }
 
     private sealed class FakeInventoryRepository(Product product) : IInventoryRepository

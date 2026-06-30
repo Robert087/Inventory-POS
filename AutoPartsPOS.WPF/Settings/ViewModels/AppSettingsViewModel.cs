@@ -1,6 +1,7 @@
 using AutoPartsPOS.Application.Common.ViewModels;
 using AutoPartsPOS.Application.Settings.Dtos;
 using AutoPartsPOS.Application.Settings.Interfaces;
+using AutoPartsPOS.WPF.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections;
@@ -9,7 +10,9 @@ using System.ComponentModel;
 
 namespace AutoPartsPOS.WPF.Settings.ViewModels;
 
-public sealed partial class AppSettingsViewModel(IApplicationSettingsService settingsService) : ViewModelBase, INotifyDataErrorInfo
+public sealed partial class AppSettingsViewModel(
+    IApplicationSettingsService settingsService,
+    ShellViewModel shellViewModel) : ViewModelBase, INotifyDataErrorInfo
 {
     private readonly Dictionary<string, List<string>> _errors = [];
 
@@ -74,6 +77,9 @@ public sealed partial class AppSettingsViewModel(IApplicationSettingsService set
             }
 
             ApplyErrors(new Dictionary<string, string[]>());
+            StoreName = StoreName.Trim();
+            CurrencySymbol = CurrencySymbol.Trim();
+            shellViewModel.ApplyStoreName(StoreName);
             SaveMessages.Add("تم حفظ الإعدادات بنجاح.");
         });
     }
@@ -86,6 +92,7 @@ public sealed partial class AppSettingsViewModel(IApplicationSettingsService set
             SaveMessages.Clear();
             var defaults = await settingsService.ResetToDefaultsAsync(cancellationToken);
             ApplySettings(defaults);
+            shellViewModel.ApplyStoreName(defaults.StoreName);
             ApplyErrors(new Dictionary<string, string[]>());
             SaveMessages.Add("تمت استعادة الإعدادات الافتراضية.");
         });
@@ -96,7 +103,9 @@ public sealed partial class AppSettingsViewModel(IApplicationSettingsService set
         await ExecuteBusyAsync(async token =>
         {
             SaveMessages.Clear();
-            ApplySettings(await settingsService.LoadAsync(token));
+            var settings = await settingsService.LoadAsync(token);
+            ApplySettings(settings);
+            shellViewModel.ApplyStoreName(settings.StoreName);
         }, cancellationToken);
     }
 

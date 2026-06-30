@@ -12,4 +12,6 @@ public interface ISupplierService
     Task<OperationResult> SaveAsync(SaveSupplierDto dto, CancellationToken cancellationToken = default);
 
     Task<OperationResult> DeactivateAsync(long id, CancellationToken cancellationToken = default);
+
+    Task<OperationResult> DeleteAsync(long id, CancellationToken cancellationToken = default);
 }

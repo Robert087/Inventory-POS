@@ -84,6 +84,27 @@ public sealed class SupplierService(
         return OperationResult.Success();
     }
 
+    public async Task<OperationResult> DeleteAsync(long id, CancellationToken cancellationToken = default)
+    {
+        var errors = new Dictionary<string, List<string>>();
+        var supplier = await supplierRepository.GetByIdAsync(id, cancellationToken);
+        if (supplier is null)
+        {
+            AddError(errors, string.Empty, "المورد غير موجود.");
+            return OperationResult.Failure(errors);
+        }
+
+        if (await supplierRepository.HasPurchaseInvoicesAsync(id, cancellationToken))
+        {
+            AddError(errors, string.Empty, "لا يمكن حذف المورد لأنه مرتبط بفواتير شراء. يمكنك تعطيله من شاشة التعديل للحفاظ على السجلات السابقة.");
+            return OperationResult.Failure(errors);
+        }
+
+        supplierRepository.Delete(supplier);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return OperationResult.Success();
+    }
+
     private async Task<Dictionary<string, List<string>>> ValidateAsync(SaveSupplierDto dto, CancellationToken cancellationToken)
     {
         var errors = new Dictionary<string, List<string>>();

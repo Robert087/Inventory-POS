@@ -18,6 +18,8 @@ using AutoPartsPOS.WPF.LatestPrices.ViewModels;
 using AutoPartsPOS.WPF.HomeExpenses.Services;
 using AutoPartsPOS.WPF.HomeExpenses.ViewModels;
 using AutoPartsPOS.WPF.ViewModels;
+using AutoPartsPOS.WPF.Backups.Services;
+using AutoPartsPOS.WPF.Backups.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoPartsPOS.WPF;
@@ -30,6 +32,8 @@ public static class DependencyInjection
 
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<IDeleteConfirmationService, DeleteConfirmationService>();
+        services.AddSingleton<IDataBackupService, DataBackupService>();
         services.AddScoped<ICatalogDialogService, CatalogDialogService>();
         services.AddScoped<ISupplierDialogService, SupplierDialogService>();
         services.AddScoped<ILatestPriceDialogService, LatestPriceDialogService>();
@@ -54,6 +58,7 @@ public static class DependencyInjection
         services.AddTransient<HomeExpenseDialogViewModel>();
         services.AddTransient<HomeExpenseDetailsDialogViewModel>();
         services.AddTransient<AppSettingsViewModel>();
+        services.AddTransient<BackupsViewModel>();
         services.AddTransient<PurchaseInvoicesViewModel>();
         services.AddTransient<PurchaseInvoiceDialogViewModel>();
         services.AddTransient<PurchaseInvoiceDetailsViewModel>();

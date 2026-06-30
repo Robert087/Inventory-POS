@@ -6,6 +6,7 @@ using AutoPartsPOS.Application.Suppliers.Dtos;
 using AutoPartsPOS.Application.Suppliers.Interfaces;
 using AutoPartsPOS.WPF.Catalog.ViewModels;
 using AutoPartsPOS.WPF.Helpers;
+using AutoPartsPOS.WPF.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -15,7 +16,8 @@ namespace AutoPartsPOS.WPF.Purchases.ViewModels;
 public sealed partial class PurchaseInvoiceDialogViewModel(
     IPurchaseInvoiceService purchaseInvoiceService,
     ISupplierService supplierService,
-    IProductService productService) : ValidatableDialogViewModel
+    IProductService productService,
+    IDeleteConfirmationService deleteConfirmationService) : ValidatableDialogViewModel
 {
     public ObservableCollection<SupplierDto> Suppliers { get; } = [];
 
@@ -143,7 +145,8 @@ public sealed partial class PurchaseInvoiceDialogViewModel(
     [RelayCommand]
     private void RemoveLine()
     {
-        if (SelectedLine is null)
+        if (SelectedLine is null ||
+            !deleteConfirmationService.ConfirmLineRemoval(SelectedLine.Product?.NameAr ?? "السطر المحدد"))
         {
             return;
         }

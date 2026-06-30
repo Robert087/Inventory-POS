@@ -164,6 +164,27 @@ public sealed class ProductService(
         return OperationResult.Success();
     }
 
+    public async Task<OperationResult> DeleteAsync(long id, CancellationToken cancellationToken = default)
+    {
+        var errors = new Dictionary<string, List<string>>();
+        var product = await productRepository.GetByIdAsync(id, cancellationToken);
+        if (product is null)
+        {
+            AddError(errors, string.Empty, "الصنف غير موجود.");
+            return OperationResult.Failure(errors);
+        }
+
+        if (await productRepository.HasReferencesAsync(id, cancellationToken))
+        {
+            AddError(errors, string.Empty, "لا يمكن حذف الصنف لأنه مرتبط بفاتورة أو حركة مخزون. يمكنك تعطيله من شاشة التعديل للحفاظ على السجلات السابقة.");
+            return OperationResult.Failure(errors);
+        }
+
+        productRepository.Delete(product);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return OperationResult.Success();
+    }
+
     private async Task<Dictionary<string, List<string>>> ValidateAsync(SaveProductDto dto, CancellationToken cancellationToken)
     {
         var errors = new Dictionary<string, List<string>>();

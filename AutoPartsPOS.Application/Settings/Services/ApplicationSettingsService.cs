@@ -117,7 +117,7 @@ public sealed class ApplicationSettingsService(IAppSettingsService appSettingsSe
     {
         return new ApplicationSettingsDto
         {
-            StoreName = "محل إكسسوارات السيارات",
+            StoreName = "Taison System",
             StorePhone = string.Empty,
             StoreAddress = string.Empty,
             CurrencySymbol = "ج.م",

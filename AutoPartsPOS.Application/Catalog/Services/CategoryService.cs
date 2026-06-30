@@ -84,6 +84,27 @@ public sealed class CategoryService(
         return OperationResult.Success();
     }
 
+    public async Task<OperationResult> DeleteAsync(long id, CancellationToken cancellationToken = default)
+    {
+        var errors = new Dictionary<string, List<string>>();
+        var category = await categoryRepository.GetByIdAsync(id, cancellationToken);
+        if (category is null)
+        {
+            AddError(errors, string.Empty, "التصنيف غير موجود.");
+            return OperationResult.Failure(errors);
+        }
+
+        if (await categoryRepository.HasProductsAsync(id, cancellationToken))
+        {
+            AddError(errors, string.Empty, "لا يمكن حذف التصنيف لأنه مرتبط بصنف واحد أو أكثر. يمكنك تعطيله من شاشة التعديل بدلًا من حذفه.");
+            return OperationResult.Failure(errors);
+        }
+
+        categoryRepository.Delete(category);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return OperationResult.Success();
+    }
+
     private async Task<Dictionary<string, List<string>>> ValidateAsync(SaveCategoryDto dto, CancellationToken cancellationToken)
     {
         var errors = new Dictionary<string, List<string>>();

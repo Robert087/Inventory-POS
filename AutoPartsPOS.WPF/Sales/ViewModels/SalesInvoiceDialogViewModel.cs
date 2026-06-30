@@ -5,6 +5,7 @@ using AutoPartsPOS.Application.Sales.Interfaces;
 using AutoPartsPOS.WPF.Catalog.ViewModels;
 using AutoPartsPOS.WPF.Helpers;
 using AutoPartsPOS.WPF.Sales.Services;
+using AutoPartsPOS.WPF.Services;
 using AutoPartsPOS.Domain.Common;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,7 +16,8 @@ namespace AutoPartsPOS.WPF.Sales.ViewModels;
 public sealed partial class SalesInvoiceDialogViewModel(
     ISalesInvoiceService salesInvoiceService,
     IProductService productService,
-    ISalesInvoicePrintService printService) : ValidatableDialogViewModel
+    ISalesInvoicePrintService printService,
+    IDeleteConfirmationService deleteConfirmationService) : ValidatableDialogViewModel
 {
     private long? _lastSavedInvoiceId;
 
@@ -195,7 +197,8 @@ public sealed partial class SalesInvoiceDialogViewModel(
     [RelayCommand]
     private void RemoveLine()
     {
-        if (SelectedLine is null)
+        if (SelectedLine is null ||
+            !deleteConfirmationService.ConfirmLineRemoval(SelectedLine.Product?.NameAr ?? "السطر المحدد"))
         {
             return;
         }

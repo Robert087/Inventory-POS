@@ -3,6 +3,7 @@ using AutoPartsPOS.Infrastructure;
 using AutoPartsPOS.Persistence;
 using AutoPartsPOS.WPF.Services;
 using AutoPartsPOS.WPF.ViewModels;
+using AutoPartsPOS.WPF.Backups.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -46,6 +47,17 @@ public partial class App : System.Windows.Application
         await _host.StartAsync();
 
         await InitializeDatabaseAsync();
+
+        try
+        {
+            var backupService = _host.Services.GetRequiredService<IDataBackupService>();
+            await backupService.EnsureDailyBackupAsync();
+        }
+        catch (Exception exception)
+        {
+            var startupLog = Path.Combine(AppContext.BaseDirectory, "Logs", "startup.log");
+            WriteStartupLog(startupLog, $"Daily backup failed; application startup will continue.{Environment.NewLine}{exception}");
+        }
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();

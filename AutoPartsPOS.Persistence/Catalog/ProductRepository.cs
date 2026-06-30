@@ -99,5 +99,15 @@ public sealed class ProductRepository(AppDbContext dbContext) : IProductReposito
     {
         return dbContext.Set<Product>().AddAsync(product, cancellationToken).AsTask();
     }
+
+    public async Task<bool> HasReferencesAsync(long id, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.InventoryTransactions.AnyAsync(item => item.ProductId == id, cancellationToken)
+            || await dbContext.PurchaseInvoiceItems.AnyAsync(item => item.ProductId == id, cancellationToken)
+            || await dbContext.SalesInvoiceItems.AnyAsync(item => item.ProductId == id, cancellationToken);
+    }
+
+    public void Delete(Product product) =>
+        dbContext.Products.Remove(product);
 }
 

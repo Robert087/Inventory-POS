@@ -5,87 +5,218 @@
              FlowDirection="RightToLeft"
              Language="ar-EG">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid MaxWidth="920">
+        <Grid MaxWidth="1040" Margin="0,0,0,24">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <DockPanel LastChildFill="False">
-                <TextBlock Style="{StaticResource PageTitleStyle}" Text="الإعدادات" />
-                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                    <Button Command="{Binding SaveCommand}" Content="حفظ" Style="{StaticResource PrimaryButtonStyle}" />
-                    <Button Margin="8,0,0,0" Command="{Binding ResetCommand}" Content="استعادة" Style="{StaticResource SecondaryButtonStyle}" />
-                </StackPanel>
-            </DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <Border Grid.Row="1" Margin="0,16,0,0" Style="{StaticResource SectionCardStyle}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource PageTitleStyle}" Text="الإعدادات" />
+                    <TextBlock Margin="0,6,0,0"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
+                               Text="خصص بيانات المتجر وطريقة احتساب مؤشرات المبيعات."
+                               TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" FlowDirection="LeftToRight">
+                    <Button Margin="8,0,0,0"
+                            Command="{Binding ResetCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            ToolTip="إرجاع جميع القيم الافتراضية">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Margin="0,0,8,0" Kind="Restore" />
+                            <TextBlock Text="استعادة الافتراضي" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding SaveCommand}"
+                            IsDefault="True"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            ToolTip="حفظ وتطبيق الإعدادات">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Margin="0,0,8,0" Kind="ContentSaveOutline" />
+                            <TextBlock Text="حفظ التغييرات" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="1" Margin="0,20,0,0" Style="{StaticResource SectionCardStyle}">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="14" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="14" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="14" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="14" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
-                             materialDesign:HintAssist.Hint="اسم المتجر"
-                             Style="{StaticResource ModernTextBoxStyle}"
-                             Text="{Binding StoreName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
-                    <TextBox Grid.Row="2" Grid.Column="0"
-                             materialDesign:HintAssist.Hint="هاتف المتجر"
-                             Style="{StaticResource ModernTextBoxStyle}"
-                             Text="{Binding StorePhone, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBox Grid.Row="2" Grid.Column="2"
-                             materialDesign:HintAssist.Hint="رمز العملة"
-                             Style="{StaticResource ModernTextBoxStyle}"
-                             Text="{Binding CurrencySymbol, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
-                    <TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
-                             Height="90"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             materialDesign:HintAssist.Hint="عنوان المتجر"
-                             Style="{StaticResource ModernTextBoxStyle}"
-                             Text="{Binding StoreAddress, UpdateSourceTrigger=PropertyChanged}" />
-                    <CheckBox Grid.Row="6" Grid.Column="0"
-                              Content="تنبيه المخزون المنخفض"
-                              IsChecked="{Binding LowStockAlertEnabled}"
-                              Style="{StaticResource MaterialDesignCheckBox}" />
-                    <TextBox Grid.Row="8" Grid.Column="0"
-                             materialDesign:HintAssist.Hint="أيام بطيئة الحركة"
-                             Style="{StaticResource ModernTextBoxStyle}"
-                             Text="{Binding SlowMovingDays, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
-                    <TextBox Grid.Row="8" Grid.Column="2"
-                             materialDesign:HintAssist.Hint="أيام الأعلى مبيعاً"
-                             Style="{StaticResource ModernTextBoxStyle}"
-                             Text="{Binding TopSellingDays, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="42" Height="42" Margin="0,0,0,0"
+                                Background="{DynamicResource AppPrimarySoftBrush}"
+                                CornerRadius="10">
+                            <materialDesign:PackIcon HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource AppPrimaryBrush}"
+                                                     Kind="StoreOutline" />
+                        </Border>
+                        <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                            <TextBlock FontSize="17" FontWeight="SemiBold" Text="هوية المتجر" />
+                            <TextBlock Margin="0,3,0,0"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
+                                       Text="سيظهر اسم المتجر في عنوان البرنامج والفواتير المطبوعة." />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,22,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="16" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBox Grid.ColumnSpan="3"
+                                 materialDesign:HintAssist.Hint="اسم المتجر"
+                                 MaxLength="120"
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 Text="{Binding StoreName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+                        <TextBox Grid.Row="2"
+                                 materialDesign:HintAssist.Hint="هاتف المتجر"
+                                 MaxLength="40"
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 Text="{Binding StorePhone, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Grid.Row="2" Grid.Column="2"
+                                 materialDesign:HintAssist.Hint="رمز العملة"
+                                 MaxLength="12"
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 Text="{Binding CurrencySymbol, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+                    </Grid>
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Row="2" Margin="0,16,0,0">
-                <ItemsControl ItemsSource="{Binding SaveMessages}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Foreground="ForestGreen" Text="{Binding}" TextWrapping="Wrap" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <TextBlock Margin="0,12,0,0"
-                           Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
-                           Text="{Binding ErrorMessage}"
-                           TextWrapping="Wrap" />
-            </StackPanel>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Margin="0,0,10,0"
+                                                     Foreground="{DynamicResource AppPrimaryBrush}"
+                                                     Kind="MapMarkerOutline" />
+                            <TextBlock FontSize="16" FontWeight="SemiBold" Text="بيانات التواصل" />
+                        </StackPanel>
+                        <TextBox Height="112"
+                                 Margin="0,18,0,0"
+                                 AcceptsReturn="True"
+                                 MaxLength="300"
+                                 TextWrapping="Wrap"
+                                 VerticalContentAlignment="Top"
+                                 materialDesign:HintAssist.Hint="عنوان المتجر"
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 Text="{Binding StoreAddress, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox Margin="0,18,0,0"
+                                  Content="تفعيل تنبيه المخزون المنخفض"
+                                  IsChecked="{Binding LowStockAlertEnabled}"
+                                  Style="{StaticResource MaterialDesignCheckBox}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Margin="0,0,10,0"
+                                                     Foreground="{DynamicResource AppPrimaryBrush}"
+                                                     Kind="ChartTimelineVariant" />
+                            <TextBlock FontSize="16" FontWeight="SemiBold" Text="نطاق تحليل المبيعات" />
+                        </StackPanel>
+                        <TextBlock Margin="0,7,0,18"
+                                   Foreground="{DynamicResource AppMutedTextBrush}"
+                                   Text="تُطبق القيم عند فتح لوحة التحكم أو تحديثها."
+                                   TextWrapping="Wrap" />
+                        <TextBox materialDesign:HintAssist.Hint="أيام بطيئة الحركة"
+                                 MaxLength="4"
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 Text="{Binding SlowMovingDays, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True, ValidatesOnNotifyDataErrors=True}" />
+                        <TextBlock Margin="4,5,4,14"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource AppMutedTextBrush}"
+                                   Text="المنتج بلا مبيعات خلال هذه المدة يُعد بطيء الحركة." />
+                        <TextBox materialDesign:HintAssist.Hint="أيام الأعلى مبيعاً"
+                                 MaxLength="4"
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 Text="{Binding TopSellingDays, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True, ValidatesOnNotifyDataErrors=True}" />
+                        <TextBlock Margin="4,5,4,0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource AppMutedTextBrush}"
+                                   Text="يُحسب ترتيب المنتجات من مبيعات هذه المدة حتى اليوم." />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="3">
+                <Border Padding="14,11"
+                        Background="#ECFDF3"
+                        BorderBrush="#A7F3D0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SaveMessages.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <ItemsControl ItemsSource="{Binding SaveMessages}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Margin="0,0,8,0" Foreground="#15803D" Kind="CheckCircleOutline" />
+                                    <TextBlock VerticalAlignment="Center" Foreground="#166534" Text="{Binding}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+                <Border Padding="14,11"
+                        Background="#FEF2F2"
+                        BorderBrush="#FECACA"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Margin="0,0,8,0" Foreground="#B91C1C" Kind="AlertCircleOutline" />
+                        <TextBlock VerticalAlignment="Center" Foreground="#991B1B" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
     </ScrollViewer>
 </UserControl>

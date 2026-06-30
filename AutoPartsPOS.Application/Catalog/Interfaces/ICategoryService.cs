@@ -14,4 +14,6 @@ public interface ICategoryService
     Task<OperationResult> SaveAsync(SaveCategoryDto dto, CancellationToken cancellationToken = default);
 
     Task<OperationResult> DeactivateAsync(long id, CancellationToken cancellationToken = default);
+
+    Task<OperationResult> DeleteAsync(long id, CancellationToken cancellationToken = default);
 }

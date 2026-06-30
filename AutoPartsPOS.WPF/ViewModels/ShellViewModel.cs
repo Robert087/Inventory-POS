@@ -1,6 +1,8 @@
 using AutoPartsPOS.Application.Common.Interfaces;
 using AutoPartsPOS.Application.Common.ViewModels;
+using AutoPartsPOS.Application.Settings.Interfaces;
 using AutoPartsPOS.WPF.Catalog.ViewModels;
+using AutoPartsPOS.WPF.Backups.ViewModels;
 using AutoPartsPOS.WPF.Inventory.ViewModels;
 using AutoPartsPOS.WPF.LatestPrices.ViewModels;
 using AutoPartsPOS.WPF.HomeExpenses.ViewModels;
@@ -14,12 +16,14 @@ using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoPartsPOS.WPF.ViewModels;
 
 public sealed partial class ShellViewModel : ViewModelBase
 {
     private readonly INavigationService _navigationService;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     [ObservableProperty]
     private ViewModelBase? _currentViewModel;
@@ -42,10 +46,11 @@ public sealed partial class ShellViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isInventoryExpanded = true;
 
-    public ShellViewModel(INavigationService navigationService)
+    public ShellViewModel(INavigationService navigationService, IServiceScopeFactory scopeFactory)
     {
         _navigationService = navigationService;
-        Title = "نظام إدارة قطع وإكسسوارات السيارات";
+        _scopeFactory = scopeFactory;
+        Title = "Taison System";
 
         if (_navigationService is INotifyPropertyChanged observableNavigation)
         {
@@ -58,8 +63,23 @@ public sealed partial class ShellViewModel : ViewModelBase
         UpdateDateTime();
     }
 
-    public override Task InitializeAsync(CancellationToken cancellationToken = default) =>
-        _navigationService.NavigateToAsync<HomeViewModel>(cancellationToken);
+    public override async Task InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var settingsService = scope.ServiceProvider.GetRequiredService<IApplicationSettingsService>();
+        var settings = await settingsService.LoadAsync(cancellationToken);
+        ApplyStoreName(settings.StoreName);
+
+        await _navigationService.NavigateToAsync<HomeViewModel>(cancellationToken);
+    }
+
+    public void ApplyStoreName(string storeName)
+    {
+        if (!string.IsNullOrWhiteSpace(storeName))
+        {
+            Title = storeName.Trim();
+        }
+    }
 
     [RelayCommand]
     private Task NavigateHomeAsync() => NavigateAsync<HomeViewModel>("Dashboard");
@@ -93,6 +113,9 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     [RelayCommand]
     private Task NavigateSettingsAsync() => NavigateAsync<AppSettingsViewModel>("Settings");
+
+    [RelayCommand]
+    private Task NavigateBackupsAsync() => NavigateAsync<BackupsViewModel>("Backups");
 
     [RelayCommand]
     private void ToggleSidebar()

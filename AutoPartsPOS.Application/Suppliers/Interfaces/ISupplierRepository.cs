@@ -12,4 +12,8 @@ public interface ISupplierRepository
     Task<bool> NameExistsAsync(string nameAr, long? excludedId = null, CancellationToken cancellationToken = default);
 
     Task AddAsync(Supplier supplier, CancellationToken cancellationToken = default);
+
+    Task<bool> HasPurchaseInvoicesAsync(long id, CancellationToken cancellationToken = default);
+
+    void Delete(Supplier supplier);
 }

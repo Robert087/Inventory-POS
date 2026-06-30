@@ -24,10 +24,23 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Resource Include="Assets\Brand\app-logo.png" />
+    <Resource Include="Assets\Brand\app-icon.ico" />
   </ItemGroup>
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+    <AssemblyName>TaisonSystem</AssemblyName>
+    <RootNamespace>AutoPartsPOS.WPF</RootNamespace>
+    <Product>Taison System</Product>
+    <Title>Taison System</Title>
+    <Company>Taison System</Company>
+    <Description>Automotive parts inventory and point of sale management system</Description>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Authors>Taison System</Authors>
+    <ApplicationIcon>Assets\Brand\app-icon.ico</ApplicationIcon>
     <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

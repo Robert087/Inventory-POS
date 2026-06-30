@@ -2,6 +2,7 @@ using AutoPartsPOS.Application.Catalog.Dtos;
 using AutoPartsPOS.Application.Catalog.Interfaces;
 using AutoPartsPOS.Application.Common.ViewModels;
 using AutoPartsPOS.WPF.Catalog.Services;
+using AutoPartsPOS.WPF.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -11,7 +12,8 @@ namespace AutoPartsPOS.WPF.Catalog.ViewModels;
 public sealed partial class ProductsViewModel(
     IProductService productService,
     ICategoryService categoryService,
-    ICatalogDialogService dialogService) : ViewModelBase
+    ICatalogDialogService dialogService,
+    IDeleteConfirmationService deleteConfirmationService) : ViewModelBase
 {
     public ObservableCollection<ProductDto> Products { get; } = [];
 
@@ -24,7 +26,6 @@ public sealed partial class ProductsViewModel(
     private CategoryLookupDto? _selectedCategory;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(EditCommand))]
     [NotifyCanExecuteChangedFor(nameof(DeactivateCommand))]
     private ProductDto? _selectedProduct;
 
@@ -49,17 +50,6 @@ public sealed partial class ProductsViewModel(
             await LoadCategoriesAsync();
             await LoadAsync();
         }
-    }
-
-    [RelayCommand(CanExecute = nameof(HasSelectedProduct))]
-    private async Task EditAsync()
-    {
-        if (SelectedProduct is null)
-        {
-            return;
-        }
-
-        await EditProductAsync(SelectedProduct);
     }
 
     [RelayCommand]
@@ -112,6 +102,31 @@ public sealed partial class ProductsViewModel(
             }
 
             await LoadAsync(cancellationToken);
+        });
+    }
+
+    [RelayCommand]
+    private async Task DeleteRowAsync(ProductDto? product)
+    {
+        if (product is null || !deleteConfirmationService.Confirm("الصنف", product.NameAr))
+        {
+            return;
+        }
+
+        await ExecuteBusyAsync(async cancellationToken =>
+        {
+            var result = await productService.DeleteAsync(product.Id, cancellationToken);
+            if (!result.Succeeded)
+            {
+                ErrorMessage = result.ErrorSummary;
+                return;
+            }
+
+            Products.Remove(product);
+            if (SelectedProduct?.Id == product.Id)
+            {
+                SelectedProduct = null;
+            }
         });
     }
 

@@ -17,4 +17,8 @@ public interface IProductRepository
     Task<bool> ProductCodeExistsAsync(string productCode, long? excludedId = null, CancellationToken cancellationToken = default);
 
     Task AddAsync(Product product, CancellationToken cancellationToken = default);
+
+    Task<bool> HasReferencesAsync(long id, CancellationToken cancellationToken = default);
+
+    void Delete(Product product);
 }

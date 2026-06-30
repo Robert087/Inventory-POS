@@ -24,12 +24,6 @@
                                 <TextBlock Text="إضافة" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="8,0,0,0" Command="{Binding EditCommand}" Style="{StaticResource SecondaryButtonStyle}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="PencilOutline" />
-                                <TextBlock Text="تعديل" />
-                            </StackPanel>
-                        </Button>
                         <Button Margin="8,0,0,0" Command="{Binding ReplenishStockCommand}" Style="{StaticResource SecondaryButtonStyle}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Margin="0,0,6,0" Kind="PackageVariantPlus" />
@@ -127,18 +121,23 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTemplateColumn Width="100" Header="إجراءات">
+                            <DataGridTemplateColumn Width="180" Header="إجراءات">
                                 <DataGridTemplateColumn.CellStyle>
                                     <Style BasedOn="{StaticResource DataGridActionCellStyle}" TargetType="DataGridCell" />
                                 </DataGridTemplateColumn.CellStyle>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                Command="{Binding DataContext.EditRowCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"
-                                                Content="تعديل"
-                                                Style="{StaticResource DataGridActionButtonStyle}" />
+                                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                            <Button Command="{Binding DataContext.EditRowCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="تعديل"
+                                                    Style="{StaticResource DataGridActionButtonStyle}" />
+                                            <Button Margin="6,0,0,0"
+                                                    Command="{Binding DataContext.DeleteRowCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="حذف"
+                                                    Style="{StaticResource DataGridDangerActionButtonStyle}" />
+                                        </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

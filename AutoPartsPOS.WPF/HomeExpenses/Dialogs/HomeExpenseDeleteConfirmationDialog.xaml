@@ -57,7 +57,7 @@
             <TextBlock Grid.Row="1"
                        Margin="0,24,0,20"
                        FontSize="16"
-                       Text="هل أنت متأكد من حذف هذا المصروف؟"
+                       Text="هل أنت متأكد من إزالة هذا المصروف؟ سيتم الحذف نهائيًا عند حفظ التغييرات ولا يمكن التراجع عنه."
                        TextWrapping="Wrap" />
 
             <StackPanel Grid.Row="2"

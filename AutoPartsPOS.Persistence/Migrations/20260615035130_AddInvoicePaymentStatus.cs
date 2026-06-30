@@ -27,26 +27,32 @@ public sealed class AddInvoicePaymentStatus : Migration
             nullable: false,
             defaultValue: "Unpaid");
 
-        migrationBuilder.AddCheckConstraint(
-            name: "ck_sales_invoices_payment_status",
-            table: "sales_invoices",
-            sql: "payment_status IN ('Paid', 'Unpaid', 'PartiallyPaid')");
+        if (ActiveProvider != "Microsoft.EntityFrameworkCore.Sqlite")
+        {
+            migrationBuilder.AddCheckConstraint(
+                name: "ck_sales_invoices_payment_status",
+                table: "sales_invoices",
+                sql: "payment_status IN ('Paid', 'Unpaid', 'PartiallyPaid')");
 
-        migrationBuilder.AddCheckConstraint(
-            name: "ck_purchase_invoices_payment_status",
-            table: "purchase_invoices",
-            sql: "payment_status IN ('Paid', 'Unpaid', 'PartiallyPaid')");
+            migrationBuilder.AddCheckConstraint(
+                name: "ck_purchase_invoices_payment_status",
+                table: "purchase_invoices",
+                sql: "payment_status IN ('Paid', 'Unpaid', 'PartiallyPaid')");
+        }
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DropCheckConstraint(
-            name: "ck_sales_invoices_payment_status",
-            table: "sales_invoices");
+        if (ActiveProvider != "Microsoft.EntityFrameworkCore.Sqlite")
+        {
+            migrationBuilder.DropCheckConstraint(
+                name: "ck_sales_invoices_payment_status",
+                table: "sales_invoices");
 
-        migrationBuilder.DropCheckConstraint(
-            name: "ck_purchase_invoices_payment_status",
-            table: "purchase_invoices");
+            migrationBuilder.DropCheckConstraint(
+                name: "ck_purchase_invoices_payment_status",
+                table: "purchase_invoices");
+        }
 
         migrationBuilder.DropColumn(
             name: "payment_status",

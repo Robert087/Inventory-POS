@@ -60,6 +60,11 @@ internal static class SqliteIntegrationValidation
         Assert((await categoryService.SaveAsync(new SaveCategoryDto { NameAr = "تصنيف اختبار SQLite" })).Succeeded, "Category creation failed.");
         var category = (await categoryService.SearchAsync("SQLite")).Single();
 
+        Assert((await categoryService.SaveAsync(new SaveCategoryDto { NameAr = "تصنيف قابل للحذف" })).Succeeded, "Disposable category creation failed.");
+        var disposableCategory = (await categoryService.SearchAsync("قابل للحذف")).Single();
+        Assert((await categoryService.DeleteAsync(disposableCategory.Id)).Succeeded, "Unlinked category deletion failed.");
+        Assert(!(await categoryService.SearchAsync("قابل للحذف")).Any(), "Deleted category is still present.");
+
         Assert((await productService.SaveAsync(new SaveProductDto
         {
             ProductCode = "SQLITE-001",
@@ -74,8 +79,25 @@ internal static class SqliteIntegrationValidation
         var product = (await productService.SearchAsync("SQLITE-001", category.Id)).Single();
         Assert(product.SellingPrice == 0, "Product without selling price was not saved safely.");
 
+        Assert((await productService.SaveAsync(new SaveProductDto
+        {
+            ProductCode = "SQLITE-DELETE",
+            NameAr = "صنف قابل للحذف",
+            CategoryId = category.Id,
+            PurchasePrice = 1,
+            SellingPrice = 2
+        })).Succeeded, "Disposable product creation failed.");
+        var disposableProduct = (await productService.SearchAsync("SQLITE-DELETE", category.Id)).Single();
+        Assert((await productService.DeleteAsync(disposableProduct.Id)).Succeeded, "Unlinked product deletion failed.");
+        Assert(!(await productService.SearchAsync("SQLITE-DELETE", category.Id)).Any(), "Deleted product is still present.");
+
         Assert((await supplierService.SaveAsync(new SaveSupplierDto { NameAr = "مورد اختبار SQLite" })).Succeeded, "Supplier creation failed.");
         var supplier = (await supplierService.SearchAsync("SQLite")).Single();
+
+        Assert((await supplierService.SaveAsync(new SaveSupplierDto { NameAr = "مورد قابل للحذف" })).Succeeded, "Disposable supplier creation failed.");
+        var disposableSupplier = (await supplierService.SearchAsync("قابل للحذف")).Single();
+        Assert((await supplierService.DeleteAsync(disposableSupplier.Id)).Succeeded, "Unlinked supplier deletion failed.");
+        Assert(!(await supplierService.SearchAsync("قابل للحذف")).Any(), "Deleted supplier is still present.");
 
         Assert((await productService.SaveAsync(new SaveProductDto
         {
@@ -140,6 +162,10 @@ internal static class SqliteIntegrationValidation
             InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
             Items = [new CreatePurchaseInvoiceItemDto { ProductId = product.Id, Quantity = 10, UnitPrice = 10 }]
         })).Succeeded, "Purchase invoice creation failed.");
+        Assert(!(await productService.DeleteAsync(product.Id)).Succeeded, "Linked product deletion was allowed.");
+        Assert(!(await categoryService.DeleteAsync(category.Id)).Succeeded, "Category containing products was deleted.");
+        Assert(!(await supplierService.DeleteAsync(supplier.Id)).Succeeded, "Supplier with purchase invoices was deleted.");
+        Console.WriteLine("SQLITE_SAFE_DELETE_RULES:PASS");
         var productAfterPurchase = (await productService.GetByIdAsync(product.Id))!;
         Assert(productAfterPurchase.CurrentStock == 10, "Purchase did not increase stock.");
         Assert(productAfterPurchase.CurrentAverageCost == 10, "Purchase did not set weighted average cost.");

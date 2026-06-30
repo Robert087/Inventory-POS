@@ -59,5 +59,11 @@ public sealed class CategoryRepository(AppDbContext dbContext) : ICategoryReposi
     {
         return dbContext.Set<ProductCategory>().AddAsync(category, cancellationToken).AsTask();
     }
+
+    public Task<bool> HasProductsAsync(long id, CancellationToken cancellationToken = default) =>
+        dbContext.Products.AnyAsync(product => product.CategoryId == id, cancellationToken);
+
+    public void Delete(ProductCategory category) =>
+        dbContext.ProductCategories.Remove(category);
 }
 

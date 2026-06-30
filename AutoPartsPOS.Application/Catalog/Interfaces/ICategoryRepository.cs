@@ -14,4 +14,8 @@ public interface ICategoryRepository
     Task<bool> NameExistsAsync(string nameAr, long? excludedId = null, CancellationToken cancellationToken = default);
 
     Task AddAsync(ProductCategory category, CancellationToken cancellationToken = default);
+
+    Task<bool> HasProductsAsync(long id, CancellationToken cancellationToken = default);
+
+    void Delete(ProductCategory category);
 }

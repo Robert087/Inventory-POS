@@ -2,6 +2,7 @@ using AutoPartsPOS.Application.Catalog.Dtos;
 using AutoPartsPOS.Application.Catalog.Interfaces;
 using AutoPartsPOS.Application.Common.ViewModels;
 using AutoPartsPOS.WPF.Catalog.Services;
+using AutoPartsPOS.WPF.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -10,7 +11,8 @@ namespace AutoPartsPOS.WPF.Catalog.ViewModels;
 
 public sealed partial class CategoriesViewModel(
     ICategoryService categoryService,
-    ICatalogDialogService dialogService) : ViewModelBase
+    ICatalogDialogService dialogService,
+    IDeleteConfirmationService deleteConfirmationService) : ViewModelBase
 {
     public ObservableCollection<CategoryDto> Categories { get; } = [];
 
@@ -18,7 +20,6 @@ public sealed partial class CategoriesViewModel(
     private string? _searchText;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(EditCommand))]
     [NotifyCanExecuteChangedFor(nameof(DeactivateCommand))]
     private CategoryDto? _selectedCategory;
 
@@ -43,10 +44,10 @@ public sealed partial class CategoriesViewModel(
         }
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelectedCategory))]
-    private async Task EditAsync()
+    [RelayCommand]
+    private async Task EditRowAsync(CategoryDto? category)
     {
-        if (SelectedCategory is not null && await dialogService.ShowCategoryDialogAsync(SelectedCategory))
+        if (category is not null && await dialogService.ShowCategoryDialogAsync(category))
         {
             await LoadAsync();
         }
@@ -71,6 +72,31 @@ public sealed partial class CategoriesViewModel(
             }
 
             await LoadAsync(cancellationToken);
+        });
+    }
+
+    [RelayCommand]
+    private async Task DeleteRowAsync(CategoryDto? category)
+    {
+        if (category is null || !deleteConfirmationService.Confirm("التصنيف", category.NameAr))
+        {
+            return;
+        }
+
+        await ExecuteBusyAsync(async cancellationToken =>
+        {
+            var result = await categoryService.DeleteAsync(category.Id, cancellationToken);
+            if (!result.Succeeded)
+            {
+                ErrorMessage = result.ErrorSummary;
+                return;
+            }
+
+            Categories.Remove(category);
+            if (SelectedCategory?.Id == category.Id)
+            {
+                SelectedCategory = null;
+            }
         });
     }
 

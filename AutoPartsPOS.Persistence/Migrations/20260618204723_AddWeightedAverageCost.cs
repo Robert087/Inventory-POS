@@ -44,36 +44,42 @@ namespace AutoPartsPOS.Persistence.Migrations
                     total_cost = ROUND(quantity * COALESCE((SELECT current_average_cost FROM products WHERE products.Id = sales_invoice_items.product_id), 0), 2);
                 """);
 
-            migrationBuilder.AddCheckConstraint(
-                name: "ck_sales_invoice_items_total_cost_non_negative",
-                table: "sales_invoice_items",
-                sql: "total_cost >= 0");
+            if (ActiveProvider != "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                migrationBuilder.AddCheckConstraint(
+                    name: "ck_sales_invoice_items_total_cost_non_negative",
+                    table: "sales_invoice_items",
+                    sql: "total_cost >= 0");
 
-            migrationBuilder.AddCheckConstraint(
-                name: "ck_sales_invoice_items_unit_cost_non_negative",
-                table: "sales_invoice_items",
-                sql: "unit_cost >= 0");
+                migrationBuilder.AddCheckConstraint(
+                    name: "ck_sales_invoice_items_unit_cost_non_negative",
+                    table: "sales_invoice_items",
+                    sql: "unit_cost >= 0");
 
-            migrationBuilder.AddCheckConstraint(
-                name: "ck_products_current_average_cost_non_negative",
-                table: "products",
-                sql: "current_average_cost >= 0");
+                migrationBuilder.AddCheckConstraint(
+                    name: "ck_products_current_average_cost_non_negative",
+                    table: "products",
+                    sql: "current_average_cost >= 0");
+            }
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropCheckConstraint(
-                name: "ck_sales_invoice_items_total_cost_non_negative",
-                table: "sales_invoice_items");
+            if (ActiveProvider != "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                migrationBuilder.DropCheckConstraint(
+                    name: "ck_sales_invoice_items_total_cost_non_negative",
+                    table: "sales_invoice_items");
 
-            migrationBuilder.DropCheckConstraint(
-                name: "ck_sales_invoice_items_unit_cost_non_negative",
-                table: "sales_invoice_items");
+                migrationBuilder.DropCheckConstraint(
+                    name: "ck_sales_invoice_items_unit_cost_non_negative",
+                    table: "sales_invoice_items");
 
-            migrationBuilder.DropCheckConstraint(
-                name: "ck_products_current_average_cost_non_negative",
-                table: "products");
+                migrationBuilder.DropCheckConstraint(
+                    name: "ck_products_current_average_cost_non_negative",
+                    table: "products");
+            }
 
             migrationBuilder.DropColumn(
                 name: "total_cost",

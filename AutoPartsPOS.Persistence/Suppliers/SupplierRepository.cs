@@ -52,5 +52,11 @@ public sealed class SupplierRepository(AppDbContext dbContext) : ISupplierReposi
     {
         return dbContext.Set<Supplier>().AddAsync(supplier, cancellationToken).AsTask();
     }
+
+    public Task<bool> HasPurchaseInvoicesAsync(long id, CancellationToken cancellationToken = default) =>
+        dbContext.PurchaseInvoices.AnyAsync(invoice => invoice.SupplierId == id, cancellationToken);
+
+    public void Delete(Supplier supplier) =>
+        dbContext.Suppliers.Remove(supplier);
 }
 
