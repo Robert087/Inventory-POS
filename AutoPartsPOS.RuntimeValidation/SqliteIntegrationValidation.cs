@@ -77,6 +77,62 @@ internal static class SqliteIntegrationValidation
         Assert((await supplierService.SaveAsync(new SaveSupplierDto { NameAr = "مورد اختبار SQLite" })).Succeeded, "Supplier creation failed.");
         var supplier = (await supplierService.SearchAsync("SQLite")).Single();
 
+        Assert((await productService.SaveAsync(new SaveProductDto
+        {
+            ProductCode = "SQLITE-WAC",
+            NameAr = "منتج اختبار WAC",
+            CategoryId = category.Id,
+            PurchasePrice = 100,
+            SellingPrice = 200,
+            CurrentStock = 0,
+            MinimumStock = 2
+        })).Succeeded, "WAC product creation failed.");
+        var wacProduct = (await productService.SearchAsync("SQLITE-WAC", category.Id)).Single();
+
+        Assert((await purchaseService.CreateAsync(new CreatePurchaseInvoiceDto
+        {
+            InvoiceNumber = "PUR-SQLITE-WAC-001",
+            SupplierId = supplier.Id,
+            InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            Items = [new CreatePurchaseInvoiceItemDto { ProductId = wacProduct.Id, Quantity = 10, UnitPrice = 100 }]
+        })).Succeeded, "First WAC purchase failed.");
+        Assert((await purchaseService.CreateAsync(new CreatePurchaseInvoiceDto
+        {
+            InvoiceNumber = "PUR-SQLITE-WAC-002",
+            SupplierId = supplier.Id,
+            InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            Items = [new CreatePurchaseInvoiceItemDto { ProductId = wacProduct.Id, Quantity = 5, UnitPrice = 160 }]
+        })).Succeeded, "WAC replenishment purchase failed.");
+        var wacProductAfterReplenishment = (await productService.GetByIdAsync(wacProduct.Id))!;
+        Assert(wacProductAfterReplenishment.CurrentStock == 15, "WAC replenishment did not increase stock to 15.");
+        Assert(wacProductAfterReplenishment.CurrentAverageCost == 120, "WAC replenishment average cost is incorrect.");
+        Assert(wacProductAfterReplenishment.PurchasePrice == 160, "Latest purchase price was not stored separately from average cost.");
+
+        Assert((await salesService.CreateAsync(new CreateSalesInvoiceDto
+        {
+            InvoiceNumber = "SAL-SQLITE-WAC",
+            InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            PaymentStatus = InvoicePaymentStatus.Paid,
+            Items = [new CreateSalesInvoiceItemDto { ProductId = wacProduct.Id, Quantity = 2, UnitPrice = 200 }]
+        })).Succeeded, "WAC product sale failed.");
+        var wacSaleDetails = await salesService.GetDetailsAsync((await salesService.SearchAsync("SAL-SQLITE-WAC")).Single().Id);
+        Assert(wacSaleDetails!.Items.Single().UnitCost == 120, "Sale after replenishment did not use weighted average cost.");
+        Assert(wacSaleDetails.Items.Single().TotalCost == 240, "Sale total cost after replenishment is incorrect.");
+
+        var wacInventoryReport = await reportingService.GetInventoryReportAsync();
+        var wacInventoryItem = wacInventoryReport.Items.Single(item => item.ProductId == wacProduct.Id);
+        Assert(wacInventoryItem.CurrentStock == 13, "WAC product stock after sale is incorrect.");
+        Assert(wacInventoryItem.CurrentAverageCost == 120, "WAC product average cost changed after sale.");
+        Assert(wacInventoryItem.InventoryValue == 13 * 120, "Inventory value must use weighted average cost.");
+
+        Assert(!(await purchaseService.CreateAsync(new CreatePurchaseInvoiceDto
+        {
+            InvoiceNumber = "PUR-SQLITE-ZERO",
+            SupplierId = supplier.Id,
+            InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            Items = [new CreatePurchaseInvoiceItemDto { ProductId = wacProduct.Id, Quantity = 1, UnitPrice = 0 }]
+        })).Succeeded, "Zero purchase price was accepted.");
+
         Assert((await purchaseService.CreateAsync(new CreatePurchaseInvoiceDto
         {
             InvoiceNumber = "PUR-SQLITE-001",
@@ -141,7 +197,7 @@ internal static class SqliteIntegrationValidation
 
         var salesFilterDate = DateOnly.FromDateTime(DateTime.Today);
         var salesToday = await salesService.SearchAsync(null, salesFilterDate, salesFilterDate);
-        Assert(salesToday.Count == 3, "Same-day sales filtering excluded invoices from the selected date.");
+        Assert(salesToday.Count == 4, "Same-day sales filtering excluded invoices from the selected date.");
         var futureSales = await salesService.SearchAsync(null, salesFilterDate.AddDays(1), salesFilterDate.AddDays(1));
         Assert(futureSales.Count == 0, "Sales date filtering returned invoices outside the selected date.");
 
@@ -169,6 +225,8 @@ internal static class SqliteIntegrationValidation
         Console.WriteLine("SQLITE_AUTO_CREATE:PASS");
         Console.WriteLine("SQLITE_MIGRATIONS:PASS");
         Console.WriteLine("SQLITE_SETTINGS_SEED:PASS");
+        Console.WriteLine("SQLITE_WAC_REPLENISHMENT:PASS");
+        Console.WriteLine("SQLITE_ZERO_PURCHASE_PRICE_REJECTED:PASS");
         Console.WriteLine("SQLITE_PURCHASE_TRANSACTION:PASS");
         Console.WriteLine("SQLITE_SALES_TRANSACTION:PASS");
         Console.WriteLine("SQLITE_VOID_SALE_TRANSACTION:PASS");

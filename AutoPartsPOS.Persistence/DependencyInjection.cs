@@ -14,6 +14,8 @@ using AutoPartsPOS.Persistence.Repositories;
 using AutoPartsPOS.Persistence.Reporting;
 using AutoPartsPOS.Persistence.Sales;
 using AutoPartsPOS.Persistence.Suppliers;
+using AutoPartsPOS.Application.HomeExpenses.Interfaces;
+using AutoPartsPOS.Persistence.HomeExpenses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +55,7 @@ public static class DependencyInjection
         services.AddScoped<ISalesAnalyticsRepository, SalesAnalyticsRepository>();
         services.AddScoped<IReportingRepository, ReportingRepository>();
         services.AddScoped<IInsightsRepository, InsightsRepository>();
+        services.AddScoped<IHomeExpenseRepository, HomeExpenseRepository>();
         services.AddSingleton<DatabaseInitializer>();
 
         return services;

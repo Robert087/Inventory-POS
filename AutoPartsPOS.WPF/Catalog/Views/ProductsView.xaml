@@ -30,6 +30,12 @@
                                 <TextBlock Text="تعديل" />
                             </StackPanel>
                         </Button>
+                        <Button Margin="8,0,0,0" Command="{Binding ReplenishStockCommand}" Style="{StaticResource SecondaryButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="PackageVariantPlus" />
+                                <TextBlock Text="إضافة كمية" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                     <TextBlock Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource PageTitleStyle}" Text="الأصناف" />
                 </Grid>
@@ -74,6 +80,7 @@
                             <DataGridTextColumn Width="130" Binding="{Binding ProductCode}" Header="الكود" />
                             <DataGridTextColumn Width="2*" Binding="{Binding NameAr}" Header="الصنف" />
                             <DataGridTextColumn Width="160" Binding="{Binding CategoryNameAr}" Header="التصنيف" />
+                            <DataGridTextColumn Width="120" Binding="{Binding CurrentAverageCost, StringFormat=F0}" Header="سعر الشراء" />
                             <DataGridTextColumn Width="120" Binding="{Binding SellingPrice, StringFormat=F0}" Header="سعر البيع" />
                             <DataGridTextColumn Width="120" Binding="{Binding CurrentStock, StringFormat=F0}" Header="الرصيد" />
                         </DataGrid.Columns>

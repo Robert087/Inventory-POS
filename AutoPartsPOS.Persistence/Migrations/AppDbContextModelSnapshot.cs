@@ -179,6 +179,101 @@ namespace AutoPartsPOS.Persistence.Migrations
                     b.ToTable("product_categories", (string)null);
                 });
 
+            modelBuilder.Entity("AutoPartsPOS.Domain.HomeExpenses.HomeExpenseDay", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("ExpenseDate")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expense_date");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("total_amount");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpenseDate")
+                        .IsUnique()
+                        .HasDatabaseName("ux_home_expense_days_expense_date");
+
+                    b.ToTable("home_expense_days", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_home_expense_days_total_amount_non_negative", "total_amount >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("AutoPartsPOS.Domain.HomeExpenses.HomeExpenseItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_by");
+
+                    b.Property<long>("HomeExpenseDayId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("home_expense_day_id");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("note");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HomeExpenseDayId")
+                        .HasDatabaseName("ix_home_expense_items_home_expense_day_id");
+
+                    b.ToTable("home_expense_items", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_home_expense_items_amount_positive", "amount > 0");
+                        });
+                });
+
             modelBuilder.Entity("AutoPartsPOS.Domain.Inventory.InventoryTransaction", b =>
                 {
                     b.Property<long>("Id")
@@ -675,6 +770,17 @@ namespace AutoPartsPOS.Persistence.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("AutoPartsPOS.Domain.HomeExpenses.HomeExpenseItem", b =>
+                {
+                    b.HasOne("AutoPartsPOS.Domain.HomeExpenses.HomeExpenseDay", "HomeExpenseDay")
+                        .WithMany("Items")
+                        .HasForeignKey("HomeExpenseDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HomeExpenseDay");
+                });
+
             modelBuilder.Entity("AutoPartsPOS.Domain.Inventory.InventoryTransaction", b =>
                 {
                     b.HasOne("AutoPartsPOS.Domain.Catalog.Product", "Product")
@@ -738,6 +844,11 @@ namespace AutoPartsPOS.Persistence.Migrations
             modelBuilder.Entity("AutoPartsPOS.Domain.Catalog.ProductCategory", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("AutoPartsPOS.Domain.HomeExpenses.HomeExpenseDay", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("AutoPartsPOS.Domain.Purchases.PurchaseInvoice", b =>

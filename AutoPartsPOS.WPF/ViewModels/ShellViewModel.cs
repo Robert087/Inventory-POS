@@ -2,6 +2,8 @@ using AutoPartsPOS.Application.Common.Interfaces;
 using AutoPartsPOS.Application.Common.ViewModels;
 using AutoPartsPOS.WPF.Catalog.ViewModels;
 using AutoPartsPOS.WPF.Inventory.ViewModels;
+using AutoPartsPOS.WPF.LatestPrices.ViewModels;
+using AutoPartsPOS.WPF.HomeExpenses.ViewModels;
 using AutoPartsPOS.WPF.Purchases.ViewModels;
 using AutoPartsPOS.WPF.Reports.ViewModels;
 using AutoPartsPOS.WPF.Sales.ViewModels;
@@ -69,6 +71,9 @@ public sealed partial class ShellViewModel : ViewModelBase
     private Task NavigateProductsAsync() => NavigateAsync<ProductsViewModel>("Products");
 
     [RelayCommand]
+    private Task NavigateLatestPricesAsync() => NavigateAsync<LatestPricesViewModel>("LatestPrices");
+
+    [RelayCommand]
     private Task NavigateSuppliersAsync() => NavigateAsync<SuppliersViewModel>("Suppliers");
 
     [RelayCommand]
@@ -82,6 +87,9 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     [RelayCommand]
     private Task NavigateReportsAsync() => NavigateAsync<ReportsViewModel>("Reports");
+
+    [RelayCommand]
+    private Task NavigateHomeExpensesAsync() => NavigateAsync<HomeExpensesViewModel>("HomeExpenses");
 
     [RelayCommand]
     private Task NavigateSettingsAsync() => NavigateAsync<AppSettingsViewModel>("Settings");
@@ -113,7 +121,7 @@ public sealed partial class ShellViewModel : ViewModelBase
             IsOperationsExpanded = true;
         }
 
-        if (page is "Products" or "Categories" or "Inventory")
+        if (page is "Products" or "Categories" or "Inventory" or "LatestPrices")
         {
             IsInventoryExpanded = true;
         }

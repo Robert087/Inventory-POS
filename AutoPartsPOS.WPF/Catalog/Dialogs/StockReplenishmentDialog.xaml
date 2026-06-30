@@ -1,0 +1,115 @@
+<Window x:Class="AutoPartsPOS.WPF.Catalog.Dialogs.StockReplenishmentDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="إضافة كمية لصنف موجود"
+        Width="620"
+        Height="680"
+        WindowStartupLocation="CenterOwner"
+        Icon="{x:Null}"
+        ResizeMode="NoResize"
+        FlowDirection="RightToLeft"
+        Language="ar-EG"
+        Background="{DynamicResource MaterialDesignPaper}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock FontSize="22"
+                   FontWeight="SemiBold"
+                   Text="إضافة كمية لصنف موجود" />
+
+        <ScrollViewer Grid.Row="1"
+                      Margin="0,24,0,0"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <ComboBox x:Name="NameComboBox"
+                          DisplayMemberPath="NameAr"
+                          IsEditable="True"
+                          IsTextSearchEnabled="False"
+                          ItemsSource="{Binding FilteredNameProducts}"
+                          SelectionChanged="NameComboBox_SelectionChanged"
+                          StaysOpenOnEdit="True"
+                          materialDesign:HintAssist.Hint="اسم الصنف"
+                          Style="{StaticResource ModernComboBoxStyle}"
+                          Text="{Binding NameSearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                <ComboBox x:Name="CodeComboBox"
+                          Margin="0,14,0,0"
+                          DisplayMemberPath="ProductCode"
+                          IsEditable="True"
+                          IsTextSearchEnabled="False"
+                          ItemsSource="{Binding FilteredCodeProducts}"
+                          SelectionChanged="CodeComboBox_SelectionChanged"
+                          StaysOpenOnEdit="True"
+                          materialDesign:HintAssist.Hint="كود الصنف"
+                          Style="{StaticResource ModernComboBoxStyle}"
+                          Text="{Binding CodeSearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Border Margin="0,16,0,0"
+                        Padding="16"
+                        Background="#F8FAFC"
+                        CornerRadius="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="10" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="10" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0">
+                            <TextBlock Foreground="#64748B" Text="اسم الصنف" />
+                            <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Text="{Binding NameAr}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="2">
+                            <TextBlock Foreground="#64748B" Text="الكود" />
+                            <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Text="{Binding ProductCode}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="0">
+                            <TextBlock Foreground="#64748B" Text="المخزون الحالي" />
+                            <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Text="{Binding CurrentStockText}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="2">
+                            <TextBlock Foreground="#64748B" Text="متوسط سعر الشراء" />
+                            <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Text="{Binding CurrentAverageCostText}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3">
+                            <TextBlock Foreground="#64748B" Text="آخر سعر شراء" />
+                            <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Text="{Binding LatestPurchasePriceText}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <TextBox Margin="0,16,0,0"
+                         materialDesign:HintAssist.Hint="الكمية الجديدة"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding NewQuantityText, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+
+                <TextBox Margin="0,14,0,0"
+                         materialDesign:HintAssist.Hint="سعر الشراء الجديد"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Text="{Binding NewPurchasePriceText, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
+
+                <TextBlock Margin="0,12,0,0"
+                           Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                           Text="{Binding ErrorMessage}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" HorizontalAlignment="Left" Orientation="Horizontal">
+            <Button Command="{Binding SaveCommand}" Content="حفظ" IsDefault="True" Style="{StaticResource PrimaryButtonStyle}" />
+            <Button Margin="8,0,0,0" Command="{Binding CancelCommand}" Content="إلغاء" IsCancel="True" Style="{StaticResource SecondaryButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</Window>

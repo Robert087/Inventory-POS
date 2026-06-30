@@ -81,11 +81,7 @@ public sealed partial class HomeViewModel(
             await ExecuteBusyAsync(async token =>
             {
                 var dashboard = await dashboardService.LoadAsync(token);
-                TodaySales = dashboard.TodaySales;
-                CurrentMonthSales = dashboard.CurrentMonthSales;
-                InvoiceCount = dashboard.InvoiceCount;
                 InventoryValue = dashboard.InventoryValue;
-                NetProfit = dashboard.NetProfit;
                 LowStockCount = dashboard.LowStockCount;
 
                 Replace(TopSellingProducts, dashboard.TopSellingProducts);
@@ -97,6 +93,9 @@ public sealed partial class HomeViewModel(
                 Replace(RecentSales, recentSales);
                 Replace(RecentPurchases, recentPurchases);
             }, cancellationToken);
+
+            await LoadDailySalesAsync(DateOnly.FromDateTime(DailySalesDate ?? DateTime.Today));
+            await LoadMonthlyStatisticsAsync(SelectedYear, SelectedMonth);
         }
         catch (Exception exception)
         {

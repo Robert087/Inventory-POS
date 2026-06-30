@@ -16,8 +16,8 @@ public sealed partial class ReportsViewModel(
     public ObservableCollection<InventoryReportItemDto> InventoryItems { get; } = [];
     private readonly List<InventoryReportItemDto> _allInventoryItems = [];
 
-    [ObservableProperty] private DateTime? _fromDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-    [ObservableProperty] private DateTime? _toDate = DateTime.Today;
+    [ObservableProperty] private DateTime? _fromDate;
+    [ObservableProperty] private DateTime? _toDate;
     [ObservableProperty] private SalesReportDto? _salesReport;
     [ObservableProperty] private ProfitReportDto? _profitReport;
     [ObservableProperty] private InventoryReportDto? _inventoryReport;
@@ -32,6 +32,14 @@ public sealed partial class ReportsViewModel(
 
     [RelayCommand]
     private async Task RefreshAsync() => await LoadAsync();
+
+    [RelayCommand]
+    private async Task ClearFiltersAsync()
+    {
+        FromDate = null;
+        ToDate = null;
+        await LoadAsync();
+    }
 
     [RelayCommand]
     private void SearchInventory() => ApplyInventoryFilter();
@@ -61,8 +69,8 @@ public sealed partial class ReportsViewModel(
             await ExecuteBusyAsync(async token =>
             {
                 SuccessMessage = null;
-                var from = DateOnly.FromDateTime(FromDate ?? DateTime.Today);
-                var to = DateOnly.FromDateTime(ToDate ?? DateTime.Today);
+                var from = FromDate is null ? DateOnly.MinValue : DateOnly.FromDateTime(FromDate.Value.Date);
+                var to = ToDate is null ? DateOnly.MaxValue : DateOnly.FromDateTime(ToDate.Value.Date);
                 if (from > to)
                 {
                     (from, to) = (to, from);

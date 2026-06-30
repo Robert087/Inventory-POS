@@ -271,6 +271,37 @@
                             </Grid>
                         </Button>
 
+                        <Border Margin="0,12,0,12"
+                                Height="1"
+                                Background="#334155"
+                                Opacity="0.8" />
+
+                        <Button Command="{Binding NavigateLatestPricesCommand}" ToolTip="أحدث الأسعار">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActivePage, Converter={StaticResource ActivePageConverter}, ConverterParameter=LatestPrices}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource AppPrimaryBrush}" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <materialDesign:PackIcon Width="18" Height="18" VerticalAlignment="Center" Kind="TagOutline" />
+                                <TextBlock Grid.Column="1"
+                                           Margin="10,0,0,0"
+                                           VerticalAlignment="Center"
+                                           Text="أحدث الأسعار"
+                                           TextTrimming="CharacterEllipsis"
+                                           Visibility="{Binding IsSidebarExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
+                        </Button>
+
                         <Button Command="{Binding NavigateReportsCommand}" ToolTip="التقارير">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
@@ -292,6 +323,37 @@
                                            Margin="10,0,0,0"
                                            VerticalAlignment="Center"
                                            Text="التقارير"
+                                           TextTrimming="CharacterEllipsis"
+                                           Visibility="{Binding IsSidebarExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
+                        </Button>
+
+                        <Border Margin="0,12,0,12"
+                                Height="1"
+                                Background="#334155"
+                                Opacity="0.8" />
+
+                        <Button Command="{Binding NavigateHomeExpensesCommand}" ToolTip="مصاريف المنزل">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource NavButtonStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActivePage, Converter={StaticResource ActivePageConverter}, ConverterParameter=HomeExpenses}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource AppPrimaryBrush}" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <materialDesign:PackIcon Width="18" Height="18" VerticalAlignment="Center" Kind="HomeOutline" />
+                                <TextBlock Grid.Column="1"
+                                           Margin="10,0,0,0"
+                                           VerticalAlignment="Center"
+                                           Text="مصاريف المنزل"
                                            TextTrimming="CharacterEllipsis"
                                            Visibility="{Binding IsSidebarExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </Grid>

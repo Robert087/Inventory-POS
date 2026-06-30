@@ -6,6 +6,7 @@
         Width="520"
         Height="420"
         WindowStartupLocation="CenterOwner"
+        Icon="{x:Null}"
         ResizeMode="NoResize"
         FlowDirection="RightToLeft"
         Language="ar-EG"

@@ -1,6 +1,7 @@
 using AutoPartsPOS.Application.Common.Interfaces;
 using AutoPartsPOS.Application.Common.Models;
 using AutoPartsPOS.Application.Inventory.Interfaces;
+using AutoPartsPOS.Application.Inventory.Services;
 using AutoPartsPOS.Application.Purchases.Dtos;
 using AutoPartsPOS.Application.Purchases.Interfaces;
 using AutoPartsPOS.Application.Suppliers.Interfaces;
@@ -65,7 +66,7 @@ public sealed class PurchaseInvoiceService(
                     ?? throw new InvalidOperationException("Product disappeared while posting purchase invoice.");
 
                 var oldStock = product.CurrentStock;
-                product.CurrentAverageCost = CalculateWeightedAverageCost(
+                product.CurrentAverageCost = InventoryCostCalculator.CalculateWeightedAverageCost(
                     oldStock,
                     product.CurrentAverageCost,
                     item.Quantity,
@@ -149,7 +150,7 @@ public sealed class PurchaseInvoiceService(
                     throw new InvalidOperationException("Voiding purchase invoice would create negative stock.");
                 }
 
-                product.CurrentAverageCost = CalculateAverageCostAfterPurchaseReversal(
+                product.CurrentAverageCost = InventoryCostCalculator.CalculateAverageCostAfterPurchaseReversal(
                     product.CurrentStock,
                     product.CurrentAverageCost,
                     item.Quantity,
@@ -173,42 +174,6 @@ public sealed class PurchaseInvoiceService(
         }, cancellationToken);
 
         return OperationResult.Success();
-    }
-
-    private static decimal CalculateWeightedAverageCost(decimal currentStock, decimal currentAverageCost, decimal purchaseQuantity, decimal purchaseUnitCost)
-    {
-        var newStock = currentStock + purchaseQuantity;
-
-        if (newStock <= 0)
-        {
-            return 0;
-        }
-
-        var currentValue = currentStock * currentAverageCost;
-        var purchaseValue = purchaseQuantity * purchaseUnitCost;
-
-        return decimal.Round((currentValue + purchaseValue) / newStock, 4);
-    }
-
-    private static decimal CalculateAverageCostAfterPurchaseReversal(decimal currentStock, decimal currentAverageCost, decimal purchaseQuantity, decimal purchaseUnitCost)
-    {
-        var newStock = currentStock - purchaseQuantity;
-
-        if (newStock <= 0)
-        {
-            return 0;
-        }
-
-        var currentValue = currentStock * currentAverageCost;
-        var reversedValue = purchaseQuantity * purchaseUnitCost;
-        var remainingValue = currentValue - reversedValue;
-
-        if (remainingValue < 0)
-        {
-            throw new InvalidOperationException("Voiding purchase invoice would create negative inventory value.");
-        }
-
-        return decimal.Round(remainingValue / newStock, 4);
     }
 
     private async Task<Dictionary<string, List<string>>> ValidateCreateAsync(CreatePurchaseInvoiceDto dto, CancellationToken cancellationToken)
@@ -253,9 +218,9 @@ public sealed class PurchaseInvoiceService(
                 AddError(errors, $"{nameof(CreatePurchaseInvoiceDto.Items)}[{index}].{nameof(CreatePurchaseInvoiceItemDto.Quantity)}", "الكمية يجب أن تكون عدداً صحيحاً.");
             }
 
-            if (item.UnitPrice < 0)
+            if (item.UnitPrice <= 0)
             {
-                AddError(errors, $"{nameof(CreatePurchaseInvoiceDto.Items)}[{index}].{nameof(CreatePurchaseInvoiceItemDto.UnitPrice)}", "سعر الوحدة لا يمكن أن يكون أقل من صفر.");
+                AddError(errors, $"{nameof(CreatePurchaseInvoiceDto.Items)}[{index}].{nameof(CreatePurchaseInvoiceItemDto.UnitPrice)}", "سعر الوحدة يجب أن يكون أكبر من صفر.");
             }
             else if (item.UnitPrice != decimal.Truncate(item.UnitPrice))
             {

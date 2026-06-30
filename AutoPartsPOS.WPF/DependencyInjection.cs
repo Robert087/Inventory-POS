@@ -13,6 +13,10 @@ using AutoPartsPOS.WPF.Settings.ViewModels;
 using AutoPartsPOS.WPF.Services;
 using AutoPartsPOS.WPF.Suppliers.Services;
 using AutoPartsPOS.WPF.Suppliers.ViewModels;
+using AutoPartsPOS.WPF.LatestPrices.Services;
+using AutoPartsPOS.WPF.LatestPrices.ViewModels;
+using AutoPartsPOS.WPF.HomeExpenses.Services;
+using AutoPartsPOS.WPF.HomeExpenses.ViewModels;
 using AutoPartsPOS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +32,8 @@ public static class DependencyInjection
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddScoped<ICatalogDialogService, CatalogDialogService>();
         services.AddScoped<ISupplierDialogService, SupplierDialogService>();
+        services.AddScoped<ILatestPriceDialogService, LatestPriceDialogService>();
+        services.AddScoped<IHomeExpenseDialogService, HomeExpenseDialogService>();
         services.AddScoped<IPurchaseDialogService, PurchaseDialogService>();
         services.AddScoped<ISalesDialogService, SalesDialogService>();
         services.AddScoped<ISalesInvoicePrintService, SalesInvoicePrintService>();
@@ -39,8 +45,14 @@ public static class DependencyInjection
         services.AddTransient<ProductsViewModel>();
         services.AddTransient<CategoryDialogViewModel>();
         services.AddTransient<ProductDialogViewModel>();
+        services.AddTransient<StockReplenishmentDialogViewModel>();
         services.AddTransient<SuppliersViewModel>();
         services.AddTransient<SupplierDialogViewModel>();
+        services.AddTransient<LatestPricesViewModel>();
+        services.AddTransient<LatestPriceDialogViewModel>();
+        services.AddTransient<HomeExpensesViewModel>();
+        services.AddTransient<HomeExpenseDialogViewModel>();
+        services.AddTransient<HomeExpenseDetailsDialogViewModel>();
         services.AddTransient<AppSettingsViewModel>();
         services.AddTransient<PurchaseInvoicesViewModel>();
         services.AddTransient<PurchaseInvoiceDialogViewModel>();

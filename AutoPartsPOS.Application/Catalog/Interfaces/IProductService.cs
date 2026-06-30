@@ -9,7 +9,11 @@ public interface IProductService
 
     Task<ProductDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
 
+    Task<ProductDto?> GetByProductCodeAsync(string productCode, CancellationToken cancellationToken = default);
+
     Task<OperationResult> SaveAsync(SaveProductDto dto, CancellationToken cancellationToken = default);
+
+    Task<OperationResult> ReplenishStockAsync(ReplenishProductStockDto dto, CancellationToken cancellationToken = default);
 
     Task<OperationResult> DeactivateAsync(long id, CancellationToken cancellationToken = default);
 }

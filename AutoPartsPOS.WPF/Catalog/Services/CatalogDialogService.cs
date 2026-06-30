@@ -36,4 +36,29 @@ public sealed class CatalogDialogService(IServiceProvider serviceProvider) : ICa
         viewModel.RequestClose += (_, result) => dialog.DialogResult = result;
         return dialog.ShowDialog() == true;
     }
+
+    public Task<bool> ShowExistingProductConfirmationAsync(string productName)
+    {
+        var dialog = new ExistingProductConfirmationDialog(productName)
+        {
+            Owner = serviceProvider.GetRequiredService<MainWindow>()
+        };
+
+        return Task.FromResult(dialog.ShowDialog() == true);
+    }
+
+    public async Task<bool> ShowStockReplenishmentDialogAsync(ProductDto? product = null)
+    {
+        var viewModel = serviceProvider.GetRequiredService<StockReplenishmentDialogViewModel>();
+        await viewModel.LoadAsync(product);
+
+        var dialog = new StockReplenishmentDialog
+        {
+            DataContext = viewModel,
+            Owner = serviceProvider.GetRequiredService<MainWindow>()
+        };
+
+        viewModel.RequestClose += (_, result) => dialog.DialogResult = result;
+        return dialog.ShowDialog() == true;
+    }
 }

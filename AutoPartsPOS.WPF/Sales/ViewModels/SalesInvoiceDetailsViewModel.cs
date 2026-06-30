@@ -14,6 +14,9 @@ public sealed partial class SalesInvoiceDetailsViewModel(
     ISalesInvoicePrintService printService,
     ISalesInvoiceService salesInvoiceService) : ViewModelBase
 {
+    private InvoicePaymentStatus _loadedPaymentStatus;
+    private decimal _loadedPaidAmount;
+
     public event EventHandler<bool?>? RequestClose;
 
     public SalesInvoiceDetailsDto Invoice { get; private set; } = new(
@@ -40,9 +43,11 @@ public sealed partial class SalesInvoiceDetailsViewModel(
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsPartiallyPaid))]
+    [NotifyPropertyChangedFor(nameof(HasPendingPaymentChanges))]
     private InvoicePaymentStatus _selectedPaymentStatus;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPendingPaymentChanges))]
     private string? _paidAmountText;
 
     [ObservableProperty]
@@ -52,9 +57,16 @@ public sealed partial class SalesInvoiceDetailsViewModel(
 
     public bool CanEditPayment => !Invoice.IsVoided;
 
+    public bool HasPendingPaymentChanges =>
+        CanEditPayment &&
+        (SelectedPaymentStatus != _loadedPaymentStatus ||
+         GetEffectivePaidAmount() != _loadedPaidAmount);
+
     public void Load(SalesInvoiceDetailsDto invoice)
     {
         Invoice = invoice;
+        _loadedPaymentStatus = invoice.PaymentStatus;
+        _loadedPaidAmount = invoice.PaidAmount;
         SelectedPaymentStatus = invoice.PaymentStatus;
         PaidAmountText = invoice.PaymentStatus == InvoicePaymentStatus.PartiallyPaid && invoice.PaidAmount > 0
             ? WholeNumberInput.Format(invoice.PaidAmount)
@@ -63,11 +75,13 @@ public sealed partial class SalesInvoiceDetailsViewModel(
         Title = "تفاصيل فاتورة البيع";
         OnPropertyChanged(nameof(Invoice));
         OnPropertyChanged(nameof(CanEditPayment));
+        OnPropertyChanged(nameof(HasPendingPaymentChanges));
     }
 
     partial void OnSelectedPaymentStatusChanged(InvoicePaymentStatus value)
     {
         SyncPaymentAmounts();
+        OnPropertyChanged(nameof(HasPendingPaymentChanges));
     }
 
     partial void OnPaidAmountTextChanged(string? value)
@@ -77,6 +91,8 @@ public sealed partial class SalesInvoiceDetailsViewModel(
         {
             RemainingAmount = Math.Max(Invoice.NetTotalAmount - paidAmount, 0);
         }
+
+        OnPropertyChanged(nameof(HasPendingPaymentChanges));
     }
 
     [RelayCommand]
@@ -172,5 +188,16 @@ public sealed partial class SalesInvoiceDetailsViewModel(
                 RemainingAmount = Math.Max(Invoice.NetTotalAmount - paidAmount, 0);
                 break;
         }
+    }
+
+    private decimal GetEffectivePaidAmount()
+    {
+        return SelectedPaymentStatus switch
+        {
+            InvoicePaymentStatus.Paid => Invoice.NetTotalAmount,
+            InvoicePaymentStatus.Unpaid => 0,
+            InvoicePaymentStatus.PartiallyPaid when WholeNumberInput.TryParseOptional(PaidAmountText, out var paidAmount) => paidAmount,
+            _ => 0
+        };
     }
 }

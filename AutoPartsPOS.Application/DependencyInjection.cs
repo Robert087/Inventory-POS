@@ -15,10 +15,14 @@ using AutoPartsPOS.Application.Suppliers.Interfaces;
 using AutoPartsPOS.Application.Suppliers.Services;
 using AutoPartsPOS.Application.Dashboard.Interfaces;
 using AutoPartsPOS.Application.Dashboard.Services;
+using AutoPartsPOS.Application.LatestPrices.Interfaces;
+using AutoPartsPOS.Application.LatestPrices.Services;
 using AutoPartsPOS.Application.Insights.Interfaces;
 using AutoPartsPOS.Application.Insights.Services;
 using AutoPartsPOS.Application.Reports.Interfaces;
 using AutoPartsPOS.Application.Reports.Services;
+using AutoPartsPOS.Application.HomeExpenses.Interfaces;
+using AutoPartsPOS.Application.HomeExpenses.Services;
 
 namespace AutoPartsPOS.Application;
 
@@ -37,6 +41,8 @@ public static class DependencyInjection
         services.AddScoped<IReportingService, ReportingService>();
         services.AddScoped<ISmartInsightsService, SmartInsightsService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<ILatestPriceService, LatestPriceService>();
+        services.AddScoped<IHomeExpenseService, HomeExpenseService>();
 
         return services;
     }

@@ -1,4 +1,5 @@
 using AutoPartsPOS.Application.Common.Interfaces;
+using AutoPartsPOS.Domain.HomeExpenses;
 using AutoPartsPOS.Domain.Catalog;
 using AutoPartsPOS.Domain.Common;
 using AutoPartsPOS.Domain.Inventory;
@@ -32,6 +33,10 @@ public sealed class AppDbContext(
     public DbSet<SalesInvoice> SalesInvoices => Set<SalesInvoice>();
 
     public DbSet<SalesInvoiceItem> SalesInvoiceItems => Set<SalesInvoiceItem>();
+
+    public DbSet<HomeExpenseDay> HomeExpenseDays => Set<HomeExpenseDay>();
+
+    public DbSet<HomeExpenseItem> HomeExpenseItems => Set<HomeExpenseItem>();
 
     IQueryable<AppSetting> IAppDbContext.AppSettings => AppSettings;
 

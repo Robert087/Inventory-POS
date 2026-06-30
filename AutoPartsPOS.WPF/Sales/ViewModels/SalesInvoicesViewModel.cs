@@ -72,7 +72,23 @@ public sealed partial class SalesInvoicesViewModel(
             return;
         }
 
-        var details = await salesInvoiceService.GetDetailsAsync(SelectedInvoice.Id);
+        await ViewInvoiceAsync(SelectedInvoice);
+    }
+
+    [RelayCommand]
+    private async Task ViewRowAsync(SalesInvoiceListDto? invoice)
+    {
+        if (invoice is null)
+        {
+            return;
+        }
+
+        await ViewInvoiceAsync(invoice);
+    }
+
+    private async Task ViewInvoiceAsync(SalesInvoiceListDto invoice)
+    {
+        var details = await salesInvoiceService.GetDetailsAsync(invoice.Id);
 
         if (details is not null)
         {

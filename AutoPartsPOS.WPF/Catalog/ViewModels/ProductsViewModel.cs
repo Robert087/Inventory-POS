@@ -61,6 +61,17 @@ public sealed partial class ProductsViewModel(
         }
     }
 
+    [RelayCommand]
+    private async Task ReplenishStockAsync()
+    {
+        ErrorMessage = null;
+
+        if (await dialogService.ShowStockReplenishmentDialogAsync())
+        {
+            await LoadAsync();
+        }
+    }
+
     [RelayCommand(CanExecute = nameof(HasSelectedProduct))]
     private async Task DeactivateAsync()
     {

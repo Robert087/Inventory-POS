@@ -2,7 +2,10 @@ using AutoPartsPOS.Application.Catalog.Dtos;
 using AutoPartsPOS.Application.Catalog.Interfaces;
 using AutoPartsPOS.Application.Common.Interfaces;
 using AutoPartsPOS.Application.Common.Models;
+using AutoPartsPOS.Application.Inventory.Interfaces;
+using AutoPartsPOS.Application.Inventory.Services;
 using AutoPartsPOS.Domain.Catalog;
+using AutoPartsPOS.Domain.Inventory;
 using System.Text;
 
 namespace AutoPartsPOS.Application.Catalog.Services;
@@ -10,6 +13,8 @@ namespace AutoPartsPOS.Application.Catalog.Services;
 public sealed class ProductService(
     IProductRepository productRepository,
     ICategoryRepository categoryRepository,
+    IInventoryRepository inventoryRepository,
+    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork) : IProductService
 {
     public Task<IReadOnlyList<ProductDto>> SearchAsync(string? searchText, long? categoryId, CancellationToken cancellationToken = default)
@@ -26,19 +31,70 @@ public sealed class ProductService(
             return null;
         }
 
-        return new ProductDto(
-            product.Id,
-            product.ProductCode,
-            product.Barcode,
-            product.NameAr,
-            product.CategoryId,
-            product.Category?.NameAr ?? string.Empty,
-            product.PurchasePrice,
-            product.CurrentAverageCost,
-            product.SellingPrice,
-            product.CurrentStock,
-            product.MinimumStock,
-            product.IsActive);
+        return MapToDto(product);
+    }
+
+    public async Task<ProductDto?> GetByProductCodeAsync(string productCode, CancellationToken cancellationToken = default)
+    {
+        var normalizedCode = Normalize(productCode);
+
+        if (string.IsNullOrWhiteSpace(normalizedCode))
+        {
+            return null;
+        }
+
+        var product = await productRepository.GetByProductCodeAsync(normalizedCode, cancellationToken);
+
+        return product is null ? null : MapToDto(product);
+    }
+
+    public async Task<OperationResult> ReplenishStockAsync(ReplenishProductStockDto dto, CancellationToken cancellationToken = default)
+    {
+        var errors = ValidateReplenishment(dto);
+
+        if (errors.Count > 0)
+        {
+            return OperationResult.Failure(errors);
+        }
+
+        var productExists = await productRepository.GetByIdAsync(dto.ProductId, cancellationToken);
+
+        if (productExists is null)
+        {
+            AddError(errors, string.Empty, "المنتج غير موجود.");
+            return OperationResult.Failure(errors);
+        }
+
+        await unitOfWork.ExecuteInTransactionAsync(async token =>
+        {
+            var product = await inventoryRepository.GetProductForUpdateAsync(dto.ProductId, token)
+                ?? throw new InvalidOperationException("Product disappeared while replenishing stock.");
+
+            var oldStock = product.CurrentStock;
+            product.CurrentAverageCost = InventoryCostCalculator.CalculateWeightedAverageCost(
+                oldStock,
+                product.CurrentAverageCost,
+                dto.Quantity,
+                dto.PurchasePrice);
+            product.PurchasePrice = dto.PurchasePrice;
+            product.CurrentStock += dto.Quantity;
+
+            await inventoryRepository.AddTransactionAsync(new InventoryTransaction
+            {
+                ProductId = dto.ProductId,
+                TransactionType = InventoryTransactionType.Adjustment,
+                Quantity = dto.Quantity,
+                BalanceAfter = product.CurrentStock,
+                ReferenceType = InventoryReferenceType.ManualAdjustment,
+                ReferenceId = dto.ProductId,
+                TransactionDate = dateTimeProvider.Now,
+                Notes = "إضافة كمية للصنف"
+            }, token);
+
+            await unitOfWork.SaveChangesAsync(token);
+        }, cancellationToken);
+
+        return OperationResult.Success();
     }
 
     public async Task<OperationResult> SaveAsync(SaveProductDto dto, CancellationToken cancellationToken = default)
@@ -82,7 +138,6 @@ public sealed class ProductService(
             product.Barcode = NormalizeNullable(dto.Barcode);
             product.NameAr = Normalize(dto.NameAr);
             product.CategoryId = dto.CategoryId;
-            product.PurchasePrice = dto.PurchasePrice;
             product.SellingPrice = dto.SellingPrice;
             product.CurrentStock = dto.CurrentStock;
             product.MinimumStock = dto.MinimumStock;
@@ -171,6 +226,53 @@ public sealed class ProductService(
         }
 
         return errors;
+    }
+
+    private static Dictionary<string, List<string>> ValidateReplenishment(ReplenishProductStockDto dto)
+    {
+        var errors = new Dictionary<string, List<string>>();
+
+        if (dto.ProductId <= 0)
+        {
+            AddError(errors, nameof(ReplenishProductStockDto.ProductId), "المنتج غير موجود.");
+        }
+
+        if (dto.Quantity <= 0)
+        {
+            AddError(errors, nameof(ReplenishProductStockDto.Quantity), "الكمية الجديدة يجب أن تكون أكبر من صفر.");
+        }
+        else if (dto.Quantity != decimal.Truncate(dto.Quantity))
+        {
+            AddError(errors, nameof(ReplenishProductStockDto.Quantity), "الكمية الجديدة يجب أن تكون عدداً صحيحاً.");
+        }
+
+        if (dto.PurchasePrice <= 0)
+        {
+            AddError(errors, nameof(ReplenishProductStockDto.PurchasePrice), "سعر الشراء الجديد يجب أن يكون أكبر من صفر.");
+        }
+        else if (dto.PurchasePrice != decimal.Truncate(dto.PurchasePrice))
+        {
+            AddError(errors, nameof(ReplenishProductStockDto.PurchasePrice), "سعر الشراء الجديد يجب أن يكون عدداً صحيحاً.");
+        }
+
+        return errors;
+    }
+
+    private static ProductDto MapToDto(Product product)
+    {
+        return new ProductDto(
+            product.Id,
+            product.ProductCode,
+            product.Barcode,
+            product.NameAr,
+            product.CategoryId,
+            product.Category?.NameAr ?? string.Empty,
+            product.PurchasePrice,
+            product.CurrentAverageCost,
+            product.SellingPrice,
+            product.CurrentStock,
+            product.MinimumStock,
+            product.IsActive);
     }
 
     private static string Normalize(string value)

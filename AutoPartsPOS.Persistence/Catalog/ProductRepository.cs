@@ -1,5 +1,6 @@
 ﻿using AutoPartsPOS.Application.Catalog.Dtos;
 using AutoPartsPOS.Application.Catalog.Interfaces;
+using AutoPartsPOS.Application.LatestPrices.Dtos;
 using AutoPartsPOS.Domain.Catalog;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,11 +48,42 @@ public sealed class ProductRepository(AppDbContext dbContext) : IProductReposito
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<LatestPriceDto>> SearchLatestPricesAsync(string? searchText, CancellationToken cancellationToken = default)
+    {
+        var query = dbContext.Set<Product>()
+            .AsNoTracking()
+            .Where(product => product.IsActive)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            var term = searchText.Trim();
+            query = query.Where(product =>
+                EF.Functions.Like(product.ProductCode, $"%{term}%") ||
+                EF.Functions.Like(product.NameAr, $"%{term}%"));
+        }
+
+        return await query
+            .OrderBy(product => product.NameAr)
+            .Select(product => new LatestPriceDto(
+                product.Id,
+                product.ProductCode,
+                product.NameAr,
+                product.PurchasePrice))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<Product?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return dbContext.Set<Product>()
             .Include(product => product.Category)
             .SingleOrDefaultAsync(product => product.Id == id, cancellationToken);
+    }
+
+    public Task<Product?> GetByProductCodeAsync(string productCode, CancellationToken cancellationToken = default)
+    {
+        return dbContext.Set<Product>()
+            .SingleOrDefaultAsync(product => product.ProductCode == productCode, cancellationToken);
     }
 
     public Task<bool> ProductCodeExistsAsync(string productCode, long? excludedId = null, CancellationToken cancellationToken = default)

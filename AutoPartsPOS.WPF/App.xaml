@@ -5,8 +5,12 @@
              xmlns:catalogViews="clr-namespace:AutoPartsPOS.WPF.Catalog.Views"
              xmlns:catalogViewModels="clr-namespace:AutoPartsPOS.WPF.Catalog.ViewModels"
              xmlns:converters="clr-namespace:AutoPartsPOS.WPF.Converters"
+             xmlns:homeExpensesViews="clr-namespace:AutoPartsPOS.WPF.HomeExpenses.Views"
+             xmlns:homeExpensesViewModels="clr-namespace:AutoPartsPOS.WPF.HomeExpenses.ViewModels"
              xmlns:inventoryViews="clr-namespace:AutoPartsPOS.WPF.Inventory.Views"
              xmlns:inventoryViewModels="clr-namespace:AutoPartsPOS.WPF.Inventory.ViewModels"
+             xmlns:latestPricesViews="clr-namespace:AutoPartsPOS.WPF.LatestPrices.Views"
+             xmlns:latestPricesViewModels="clr-namespace:AutoPartsPOS.WPF.LatestPrices.ViewModels"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:purchaseViews="clr-namespace:AutoPartsPOS.WPF.Purchases.Views"
              xmlns:purchaseViewModels="clr-namespace:AutoPartsPOS.WPF.Purchases.ViewModels"
@@ -47,6 +51,10 @@
                 <catalogViews:ProductsView />
             </DataTemplate>
 
+            <DataTemplate DataType="{x:Type latestPricesViewModels:LatestPricesViewModel}">
+                <latestPricesViews:LatestPricesView />
+            </DataTemplate>
+
             <DataTemplate DataType="{x:Type supplierViewModels:SuppliersViewModel}">
                 <supplierViews:SuppliersView />
             </DataTemplate>
@@ -69,6 +77,10 @@
 
             <DataTemplate DataType="{x:Type reportViewModels:ReportsViewModel}">
                 <reportViews:ReportsView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type homeExpensesViewModels:HomeExpensesViewModel}">
+                <homeExpensesViews:HomeExpensesView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

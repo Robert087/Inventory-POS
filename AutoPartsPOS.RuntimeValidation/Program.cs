@@ -1,4 +1,9 @@
-using AutoPartsPOS.Application.Analytics.Dtos;
+using AutoPartsPOS.Application.Catalog.Dtos;
+using AutoPartsPOS.Application.Catalog.Interfaces;
+using AutoPartsPOS.Application.Catalog.Services;
+using AutoPartsPOS.Application.LatestPrices.Dtos;
+using AutoPartsPOS.Application.LatestPrices.Interfaces;
+using AutoPartsPOS.Application.LatestPrices.Services;
 using AutoPartsPOS.Application.Common.Interfaces;
 using AutoPartsPOS.Application.Inventory.Dtos;
 using AutoPartsPOS.Application.Inventory.Interfaces;
@@ -9,6 +14,7 @@ using AutoPartsPOS.Application.Purchases.Services;
 using AutoPartsPOS.Application.Sales.Dtos;
 using AutoPartsPOS.Application.Sales.Interfaces;
 using AutoPartsPOS.Application.Sales.Services;
+using AutoPartsPOS.Application.Inventory.Services;
 using AutoPartsPOS.Application.Settings.Dtos;
 using AutoPartsPOS.Application.Settings.Interfaces;
 using AutoPartsPOS.Application.Reports.Dtos;
@@ -55,6 +61,8 @@ internal static class Program
         SetId(supplier, 1);
 
         var inventoryRepository = new FakeInventoryRepository(product);
+        var productRepository = new FakeProductRepository(product);
+        var categoryRepository = new FakeCategoryRepository();
         var purchaseRepository = new FakePurchaseInvoiceRepository();
         var salesRepository = new FakeSalesInvoiceRepository();
         var unitOfWork = new FakeUnitOfWork();
@@ -72,12 +80,93 @@ internal static class Program
             InvoiceNumber = "PUR-TEST-001",
             SupplierId = supplier.Id,
             InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
-            Items = [new CreatePurchaseInvoiceItemDto { ProductId = product.Id, Quantity = 10, UnitPrice = 10 }]
+            Items = [new CreatePurchaseInvoiceItemDto { ProductId = product.Id, Quantity = 10, UnitPrice = 100 }]
         });
         Assert(purchaseResult.Succeeded, "Purchase invoice creation failed.");
         Assert(product.CurrentStock == 10, "Purchase did not increase stock.");
-        Assert(product.CurrentAverageCost == 10, "Purchase did not set weighted average cost.");
+        Assert(product.CurrentAverageCost == 100, "Purchase did not set weighted average cost.");
+        Assert(product.PurchasePrice == 100, "Latest purchase price was not stored.");
         Assert(inventoryRepository.Transactions.Any(item => item.TransactionType == InventoryTransactionType.Purchase && item.Quantity == 10), "Purchase ledger entry missing.");
+
+        var replenishmentResult = await purchaseService.CreateAsync(new CreatePurchaseInvoiceDto
+        {
+            InvoiceNumber = "PUR-TEST-002",
+            SupplierId = supplier.Id,
+            InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            Items = [new CreatePurchaseInvoiceItemDto { ProductId = product.Id, Quantity = 5, UnitPrice = 160 }]
+        });
+        Assert(replenishmentResult.Succeeded, "Stock replenishment purchase failed.");
+        Assert(product.CurrentStock == 15, "Replenishment did not increase stock to 15.");
+        Assert(product.CurrentAverageCost == 120, "Replenishment did not recalculate weighted average cost.");
+        Assert(product.PurchasePrice == 160, "Replenishment did not store latest purchase price separately.");
+        Assert(inventoryRepository.Transactions.Count(item => item.TransactionType == InventoryTransactionType.Purchase) == 2, "Replenishment ledger entry missing.");
+
+        var productService = new ProductService(productRepository, categoryRepository, inventoryRepository, clock, unitOfWork);
+        var productNameBeforeReplenishment = product.NameAr;
+        var ledgerBeforeManualReplenishment = inventoryRepository.Transactions.Count;
+        var productCountBeforeManualReplenishment = productRepository.Products.Count;
+
+        Assert((await productService.ReplenishStockAsync(new ReplenishProductStockDto
+        {
+            ProductId = product.Id,
+            Quantity = 5,
+            PurchasePrice = 180
+        })).Succeeded, "Manual stock replenishment failed.");
+        Assert(product.CurrentStock == 20, "Manual replenishment did not increase stock.");
+        Assert(product.CurrentAverageCost == 135, "Manual replenishment did not recalculate weighted average cost.");
+        Assert(product.PurchasePrice == 180, "Manual replenishment did not update latest purchase price.");
+        Assert(product.NameAr == productNameBeforeReplenishment, "Manual replenishment changed product name.");
+        Assert(productRepository.Products.Count == productCountBeforeManualReplenishment, "Manual replenishment created duplicate product.");
+        Assert(inventoryRepository.Transactions.Count == ledgerBeforeManualReplenishment + 1, "Manual replenishment did not create inventory movement.");
+        Assert(inventoryRepository.Transactions.Any(item =>
+            item.TransactionType == InventoryTransactionType.Adjustment &&
+            item.Quantity == 5 &&
+            item.ReferenceType == InventoryReferenceType.ManualAdjustment), "Manual replenishment inventory movement is incorrect.");
+
+        var existingByCode = await productService.GetByProductCodeAsync("TEST-001");
+        Assert(existingByCode?.Id == product.Id, "GetByProductCodeAsync did not find existing product.");
+
+        var zeroPriceResult = await purchaseService.CreateAsync(new CreatePurchaseInvoiceDto
+        {
+            InvoiceNumber = "PUR-TEST-ZERO",
+            SupplierId = supplier.Id,
+            InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
+            Items = [new CreatePurchaseInvoiceItemDto { ProductId = product.Id, Quantity = 1, UnitPrice = 0 }]
+        });
+        Assert(!zeroPriceResult.Succeeded, "Zero purchase price was accepted.");
+        Assert(product.CurrentStock == 20, "Zero-price purchase attempt changed stock.");
+
+        var latestPriceService = new LatestPriceService(productRepository, categoryRepository, unitOfWork);
+        var ledgerBeforeLatestPrice = inventoryRepository.Transactions.Count;
+        var averageBeforeLatestPrice = product.CurrentAverageCost;
+        var stockBeforeLatestPrice = product.CurrentStock;
+
+        Assert((await latestPriceService.SaveAsync(new SaveLatestPriceDto
+        {
+            Id = product.Id,
+            ProductCode = product.ProductCode,
+            NameAr = product.NameAr,
+            LatestPurchasePrice = 200
+        })).Succeeded, "Latest price save failed.");
+        Assert(product.PurchasePrice == 200, "Latest purchase price was not updated.");
+        Assert(product.PurchasePrice != product.CurrentAverageCost, "Latest price should differ from average cost in this scenario.");
+        Assert(product.CurrentAverageCost == averageBeforeLatestPrice, "Latest price page changed average cost.");
+        Assert(product.CurrentStock == stockBeforeLatestPrice, "Latest price page changed stock.");
+        Assert(inventoryRepository.Transactions.Count == ledgerBeforeLatestPrice, "Latest price page created inventory movement.");
+
+        var latestPrices = await latestPriceService.SearchAsync("TEST-001");
+        Assert(latestPrices.Single().LatestPurchasePrice == 200, "Latest prices search did not return updated price.");
+
+        Assert((await latestPriceService.SaveAsync(new SaveLatestPriceDto
+        {
+            ProductCode = "TEST-REF",
+            NameAr = "مرجع سعر",
+            LatestPurchasePrice = 90
+        })).Succeeded, "Latest price reference create failed.");
+        var referenceProduct = productRepository.Products.Single(item => item.ProductCode == "TEST-REF");
+        Assert(referenceProduct.CurrentStock == 0, "Latest price reference create changed stock.");
+        Assert(referenceProduct.CurrentAverageCost == 0, "Latest price reference create set average cost.");
+        Assert(referenceProduct.PurchasePrice == 90, "Latest price reference create did not store latest price.");
 
         var salesService = new SalesInvoiceService(salesRepository, inventoryRepository, clock, unitOfWork);
         var salesResult = await salesService.CreateAsync(new CreateSalesInvoiceDto
@@ -90,9 +179,9 @@ internal static class Program
             Items = [new CreateSalesInvoiceItemDto { ProductId = product.Id, Quantity = 4, UnitPrice = 20 }]
         });
         Assert(salesResult.Succeeded, "Sales invoice creation failed.");
-        Assert(product.CurrentStock == 6, "Sale did not decrease stock.");
-        Assert(salesRepository.Invoices.Single().Items.Single().UnitCost == 10, "Sale did not store WAC unit cost snapshot.");
-        Assert(salesRepository.Invoices.Single().Items.Single().TotalCost == 40, "Sale did not store WAC total cost snapshot.");
+        Assert(product.CurrentStock == 16, "Sale did not decrease stock.");
+        Assert(salesRepository.Invoices.Single().Items.Single().UnitCost == 135, "Sale did not store WAC unit cost snapshot.");
+        Assert(salesRepository.Invoices.Single().Items.Single().TotalCost == 540, "Sale did not store WAC total cost snapshot.");
         Assert(inventoryRepository.Transactions.Any(item => item.TransactionType == InventoryTransactionType.Sale && item.Quantity == -4), "Sale ledger entry missing.");
         Assert(salesRepository.Invoices.Single().PaidAmount == 30 && salesRepository.Invoices.Single().RemainingAmount == 45,
             "Partial payment calculation failed.");
@@ -107,10 +196,10 @@ internal static class Program
             InvoiceNumber = "SAL-TEST-OVERSELL",
             InvoiceDate = DateOnly.FromDateTime(DateTime.Today),
             PaymentStatus = InvoicePaymentStatus.Unpaid,
-            Items = [new CreateSalesInvoiceItemDto { ProductId = product.Id, Quantity = 7, UnitPrice = 20 }]
+            Items = [new CreateSalesInvoiceItemDto { ProductId = product.Id, Quantity = 17, UnitPrice = 20 }]
         });
         Assert(!oversellResult.Succeeded, "Oversell validation failed.");
-        Assert(product.CurrentStock == 6, "Oversell attempt changed stock.");
+        Assert(product.CurrentStock == 16, "Oversell attempt changed stock.");
 
         var savedSale = salesRepository.Invoices.Single();
         var paidAmountBeforeVoid = savedSale.PaidAmount;
@@ -118,42 +207,60 @@ internal static class Program
         var voidResult = await salesService.VoidAsync(savedSale.Id, "اختبار الإلغاء");
         Assert(voidResult.Succeeded, "Sales invoice void failed.");
         Assert(savedSale.Status == SalesInvoiceStatus.Voided, "Sales invoice status was not changed to voided.");
-        Assert(product.CurrentStock == 10, "Voiding sale did not restore stock.");
+        Assert(product.CurrentStock == 20, "Voiding sale did not restore stock.");
         Assert(inventoryRepository.Transactions.Count(item => item.TransactionType == InventoryTransactionType.VoidSale && item.Quantity == 4) == 1, "Expected exactly one sales void ledger entry.");
         Assert(savedSale.PaidAmount == paidAmountBeforeVoid && savedSale.RemainingAmount == remainingAmountBeforeVoid,
             "Voiding a sale changed its payment tracking values.");
-        Assert(unitOfWork.TransactionCount == 3, "Expected purchase, sale, and void operations to be transactional.");
+        Assert(unitOfWork.TransactionCount == 5, "Expected purchase, replenishment, manual replenish, sale, and void operations to be transactional.");
 
         var movementCountAfterVoid = inventoryRepository.Transactions.Count;
         var duplicateVoidResult = await salesService.VoidAsync(savedSale.Id, "اختبار إلغاء مكرر");
         Assert(!duplicateVoidResult.Succeeded, "A sales invoice was cancelled twice.");
-        Assert(product.CurrentStock == 10, "Duplicate cancellation changed stock.");
+        Assert(product.CurrentStock == 20, "Duplicate cancellation changed stock.");
         Assert(inventoryRepository.Transactions.Count == movementCountAfterVoid, "Duplicate cancellation created an inventory movement.");
-        Assert(unitOfWork.TransactionCount == 3, "Duplicate cancellation opened a stock transaction.");
+        Assert(unitOfWork.TransactionCount == 5, "Duplicate cancellation opened a stock transaction.");
 
         var details = await salesRepository.GetDetailsAsync(savedSale.Id) ?? throw new InvalidOperationException("Saved sales invoice details missing.");
         var printService = new SalesInvoicePrintService(new FakeApplicationSettingsService());
         var document = await printService.CreatePreviewDocumentAsync(details);
         Assert(document.Blocks.Count > 0, "Arabic print document was not generated.");
         Assert(ReportCalculations.CalculateProfit(100, 65) == 35, "Profit calculation failed.");
+        Assert(InventoryCostCalculator.CalculateWeightedAverageCost(10, 100, 5, 160) == 120, "Weighted average cost formula failed.");
         Assert(SmartInsightCalculations.CalculateExpectedMonthlySales(15, 30) == 15, "Expected monthly sales calculation failed.");
         Assert(SmartInsightCalculations.CalculateSuggestedQuantity(15, 6) == 9, "Reorder suggestion calculation failed.");
 
         var exportService = new ReportExportService();
         var exportDirectory = Path.Combine(Path.GetTempPath(), "AutoPartsPOS-Validation");
         Directory.CreateDirectory(exportDirectory);
-        var pdfPath = Path.Combine(exportDirectory, "inventory-report.pdf");
+        var inventoryPdfPath = Path.Combine(exportDirectory, "inventory-report.pdf");
+        var salesPdfPath = Path.Combine(exportDirectory, "sales-report.pdf");
+        var profitPdfPath = Path.Combine(exportDirectory, "profit-report.pdf");
         var excelPath = Path.Combine(exportDirectory, "inventory-report.xlsx");
-        var inventoryReport = new InventoryReportDto(10, 100, 1,
+        var inventoryReport = new InventoryReportDto(20, 20 * 135, 1,
         [
             new InventoryReportItemDto(product.Id, product.ProductCode, product.NameAr, product.CurrentStock, product.CurrentAverageCost, product.CurrentStock * product.CurrentAverageCost, product.MinimumStock, true)
         ]);
-        await exportService.ExportInventoryReportToPdfAsync(inventoryReport, pdfPath);
+        var salesReport = new SalesReportDto(DateOnly.MinValue, DateOnly.MaxValue, 3, 250, 25, 225);
+        var profitReport = new ProfitReportDto(DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today), 225, 100, 125);
+        await exportService.ExportSalesReportToPdfAsync(salesReport, salesPdfPath);
+        await exportService.ExportProfitReportToPdfAsync(profitReport, profitPdfPath);
+        await exportService.ExportInventoryReportToPdfAsync(inventoryReport, inventoryPdfPath);
         await exportService.ExportInventoryReportToExcelAsync(inventoryReport, excelPath);
-        Assert(new FileInfo(pdfPath).Length > 0, "PDF export file was not generated.");
+        Assert(new FileInfo(salesPdfPath).Length > 0, "Sales PDF export file was not generated.");
+        Assert(new FileInfo(profitPdfPath).Length > 0, "Profit PDF export file was not generated.");
+        Assert(new FileInfo(inventoryPdfPath).Length > 0, "Inventory PDF export file was not generated.");
         Assert(new FileInfo(excelPath).Length > 0, "Excel export file was not generated.");
-        File.Delete(pdfPath);
-        File.Delete(excelPath);
+        if (!args.Contains("--keep-report-files", StringComparer.OrdinalIgnoreCase))
+        {
+            File.Delete(salesPdfPath);
+            File.Delete(profitPdfPath);
+            File.Delete(inventoryPdfPath);
+            File.Delete(excelPath);
+        }
+        else
+        {
+            Console.WriteLine($"REPORT_EXPORT_DIRECTORY:{exportDirectory}");
+        }
 
         if (args.Contains("--preview", StringComparer.OrdinalIgnoreCase))
         {
@@ -196,6 +303,10 @@ internal static class Program
         }
 
         Console.WriteLine("PURCHASE_STOCK_INCREASE:PASS");
+        Console.WriteLine("WAC_REPLENISHMENT:PASS");
+        Console.WriteLine("ZERO_PURCHASE_PRICE_REJECTED:PASS");
+        Console.WriteLine("LATEST_PRICES_NO_STOCK_IMPACT:PASS");
+        Console.WriteLine("STOCK_REPLENISHMENT_WORKFLOW:PASS");
         Console.WriteLine("SALE_STOCK_DECREASE:PASS");
         Console.WriteLine("OVERSELL_REJECTED:PASS");
         Console.WriteLine("VOID_SALE_STOCK_RESTORE:PASS");
@@ -237,6 +348,74 @@ internal static class Program
         {
             TransactionCount++;
             await operation(cancellationToken);
+        }
+    }
+
+    private sealed class FakeCategoryRepository : ICategoryRepository
+    {
+        public Task<IReadOnlyList<CategoryDto>> SearchAsync(string? searchText, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<CategoryDto>>([]);
+
+        public Task<IReadOnlyList<CategoryLookupDto>> GetActiveLookupAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<CategoryLookupDto>>([new CategoryLookupDto(1, "تصنيف اختبار")]);
+
+        public Task<ProductCategory?> GetByIdAsync(long id, CancellationToken cancellationToken = default) =>
+            Task.FromResult<ProductCategory?>(id == 1 ? new ProductCategory { NameAr = "تصنيف اختبار", IsActive = true } : null);
+
+        public Task<bool> NameExistsAsync(string nameAr, long? excludedId = null, CancellationToken cancellationToken = default) =>
+            Task.FromResult(false);
+
+        public Task AddAsync(ProductCategory category, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    }
+
+    private sealed class FakeProductRepository : IProductRepository
+    {
+        public List<Product> Products { get; }
+
+        public FakeProductRepository(Product initialProduct)
+        {
+            Products = [initialProduct];
+        }
+
+        public Task<IReadOnlyList<ProductDto>> SearchAsync(string? searchText, long? categoryId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<ProductDto>>([]);
+
+        public Task<IReadOnlyList<LatestPriceDto>> SearchLatestPricesAsync(string? searchText, CancellationToken cancellationToken = default)
+        {
+            var query = Products.Where(product => product.IsActive).AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var term = searchText.Trim();
+                query = query.Where(product =>
+                    product.ProductCode.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    product.NameAr.Contains(term, StringComparison.OrdinalIgnoreCase));
+            }
+
+            IReadOnlyList<LatestPriceDto> results = query
+                .OrderBy(product => product.NameAr)
+                .Select(product => new LatestPriceDto(product.Id, product.ProductCode, product.NameAr, product.PurchasePrice))
+                .ToList();
+
+            return Task.FromResult(results);
+        }
+
+        public Task<Product?> GetByIdAsync(long id, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Products.SingleOrDefault(product => product.Id == id));
+
+        public Task<Product?> GetByProductCodeAsync(string productCode, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Products.SingleOrDefault(product => product.ProductCode == productCode));
+
+        public Task<bool> ProductCodeExistsAsync(string productCode, long? excludedId = null, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Products.Any(product =>
+                product.ProductCode == productCode &&
+                (excludedId == null || product.Id != excludedId.Value)));
+
+        public Task AddAsync(Product product, CancellationToken cancellationToken = default)
+        {
+            SetId(product, Products.Count + 1);
+            Products.Add(product);
+            return Task.CompletedTask;
         }
     }
 

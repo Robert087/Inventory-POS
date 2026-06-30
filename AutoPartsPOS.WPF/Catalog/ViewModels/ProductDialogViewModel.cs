@@ -1,5 +1,6 @@
 using AutoPartsPOS.Application.Catalog.Dtos;
 using AutoPartsPOS.Application.Catalog.Interfaces;
+using AutoPartsPOS.WPF.Catalog.Services;
 using AutoPartsPOS.WPF.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,7 +10,8 @@ namespace AutoPartsPOS.WPF.Catalog.ViewModels;
 
 public sealed partial class ProductDialogViewModel(
     IProductService productService,
-    ICategoryService categoryService) : ValidatableDialogViewModel
+    ICategoryService categoryService,
+    ICatalogDialogService catalogDialogService) : ValidatableDialogViewModel
 {
     private long? _productId;
 
@@ -34,6 +36,11 @@ public sealed partial class ProductDialogViewModel(
     private string? _purchasePriceText;
 
     [ObservableProperty]
+    private string _purchasePriceHint = "سعر الشراء";
+
+    public bool IsEditMode => _productId is not null;
+
+    [ObservableProperty]
     private string? _sellingPriceText;
 
     [ObservableProperty]
@@ -56,11 +63,14 @@ public sealed partial class ProductDialogViewModel(
 
         _productId = product?.Id;
         DialogTitle = product is null ? "إضافة منتج" : "تعديل منتج";
+        PurchasePriceHint = product is null ? "سعر الشراء" : "متوسط سعر الشراء";
         ProductCode = product?.ProductCode ?? string.Empty;
         Barcode = product?.Barcode;
         NameAr = product?.NameAr ?? string.Empty;
         CategoryId = product?.CategoryId ?? Categories.FirstOrDefault()?.Id ?? 0;
-        PurchasePriceText = product is null ? null : WholeNumberInput.Format(product.PurchasePrice);
+        PurchasePriceText = product is null
+            ? null
+            : WholeNumberInput.Format(product.CurrentAverageCost);
         SellingPriceText = product is null || product.SellingPrice == 0 ? null : WholeNumberInput.Format(product.SellingPrice);
         CurrentStockText = product is null ? null : WholeNumberInput.Format(product.CurrentStock);
         MinimumStockText = product is null ? null : WholeNumberInput.Format(product.MinimumStock);
@@ -72,16 +82,24 @@ public sealed partial class ProductDialogViewModel(
     private async Task SaveAsync()
     {
         var errors = new Dictionary<string, string[]>();
+        var purchasePrice = 0m;
 
-        if (!WholeNumberInput.TryParseRequiredPositive(
-                PurchasePriceText,
-                out var purchasePrice,
-                out var purchasePriceError,
-                "سعر الشراء مطلوب",
-                "سعر الشراء يجب أن يكون أكبر من صفر",
-                "سعر الشراء يجب أن يكون عدداً صحيحاً"))
+        if (_productId is null)
         {
-            errors[nameof(PurchasePriceText)] = [purchasePriceError!];
+            if (!WholeNumberInput.TryParseRequiredPositive(
+                    PurchasePriceText,
+                    out purchasePrice,
+                    out var purchasePriceError,
+                    "سعر الشراء مطلوب",
+                    "سعر الشراء يجب أن يكون أكبر من صفر",
+                    "سعر الشراء يجب أن يكون عدداً صحيحاً"))
+            {
+                errors[nameof(PurchasePriceText)] = [purchasePriceError!];
+            }
+        }
+        else if (!WholeNumberInput.TryParseOptional(PurchasePriceText, out purchasePrice))
+        {
+            errors[nameof(PurchasePriceText)] = ["متوسط سعر الشراء يجب أن يكون عدداً صحيحاً."];
         }
 
         if (!WholeNumberInput.TryParseOptional(SellingPriceText, out var sellingPrice))
@@ -126,6 +144,24 @@ public sealed partial class ProductDialogViewModel(
 
         await ExecuteBusyAsync(async cancellationToken =>
         {
+            if (_productId is null)
+            {
+                var existingProduct = await productService.GetByProductCodeAsync(ProductCode, cancellationToken);
+
+                if (existingProduct is not null)
+                {
+                    if (await catalogDialogService.ShowExistingProductConfirmationAsync(existingProduct.NameAr))
+                    {
+                        if (await catalogDialogService.ShowStockReplenishmentDialogAsync(existingProduct))
+                        {
+                            Close(true);
+                        }
+                    }
+
+                    return;
+                }
+            }
+
             var result = await productService.SaveAsync(new SaveProductDto
             {
                 Id = _productId,
@@ -133,7 +169,7 @@ public sealed partial class ProductDialogViewModel(
                 Barcode = Barcode,
                 NameAr = NameAr,
                 CategoryId = CategoryId,
-                PurchasePrice = purchasePrice,
+                PurchasePrice = _productId is null ? purchasePrice : 0,
                 SellingPrice = sellingPrice,
                 CurrentStock = currentStock,
                 MinimumStock = minimumStock,
@@ -142,6 +178,26 @@ public sealed partial class ProductDialogViewModel(
 
             if (!result.Succeeded)
             {
+                if (_productId is null &&
+                    result.Errors.TryGetValue(nameof(SaveProductDto.ProductCode), out var codeErrors) &&
+                    codeErrors.Any(message => message.Contains("مستخدم", StringComparison.Ordinal)))
+                {
+                    var existingProduct = await productService.GetByProductCodeAsync(ProductCode, cancellationToken);
+
+                    if (existingProduct is not null)
+                    {
+                        if (await catalogDialogService.ShowExistingProductConfirmationAsync(existingProduct.NameAr))
+                        {
+                            if (await catalogDialogService.ShowStockReplenishmentDialogAsync(existingProduct))
+                            {
+                                Close(true);
+                            }
+                        }
+
+                        return;
+                    }
+                }
+
                 ApplyErrors(result.Errors);
                 ErrorMessage = result.ErrorSummary;
                 return;

@@ -5,6 +5,7 @@
         Width="860"
         Height="640"
         WindowStartupLocation="CenterOwner"
+        Icon="{x:Null}"
         FlowDirection="RightToLeft"
         Language="ar-EG"
         Background="{DynamicResource MaterialDesignPaper}">

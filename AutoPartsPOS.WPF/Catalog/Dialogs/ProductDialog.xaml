@@ -5,6 +5,7 @@
         Title="{Binding DialogTitle}"
         Width="720"
         Height="640"
+        Icon="{x:Null}"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         FlowDirection="RightToLeft"
@@ -59,7 +60,8 @@
                       Style="{StaticResource ModernComboBoxStyle}" />
 
             <TextBox Grid.Row="6" Grid.Column="0"
-                     materialDesign:HintAssist.Hint="سعر الشراء"
+                     materialDesign:HintAssist.Hint="{Binding PurchasePriceHint}"
+                     IsReadOnly="{Binding IsEditMode}"
                      Style="{StaticResource ModernTextBoxStyle}"
                      DataObject.Pasting="WholeNumberTextBox_Pasting"
                      PreviewTextInput="WholeNumberTextBox_PreviewTextInput"

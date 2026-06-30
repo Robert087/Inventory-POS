@@ -1,0 +1,294 @@
+<UserControl x:Class="AutoPartsPOS.WPF.HomeExpenses.Views.HomeExpensesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             FlowDirection="RightToLeft"
+             Language="ar-EG">
+    <UserControl.Resources>
+        <Style x:Key="HomeExpenseGridActionButtonStyle"
+               BasedOn="{StaticResource SecondaryButtonStyle}"
+               TargetType="Button">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="10,2" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <Border Style="{StaticResource ToolbarCardStyle}">
+                <Grid FlowDirection="LeftToRight">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding AddCommand}" Style="{StaticResource PrimaryButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="Plus" />
+                                <TextBlock Text="إضافة مصاريف" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="8,0,0,0" Command="{Binding ViewCommand}" Style="{StaticResource SecondaryButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Margin="0,0,6,0" Kind="EyeOutline" />
+                                <TextBlock Text="عرض" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1"
+                               HorizontalAlignment="Right"
+                               Style="{StaticResource PageTitleStyle}"
+                               Text="مصاريف المنزل" />
+                </Grid>
+            </Border>
+
+            <Grid Margin="0,16,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        MinHeight="132"
+                        VerticalAlignment="Stretch"
+                        Style="{StaticResource SectionCardStyle}">
+                    <Grid VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="مصاريف اليوم" />
+                        <StackPanel Grid.Row="1"
+                                    Margin="0,12,0,0"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                            <DatePicker Width="180"
+                                        VerticalAlignment="Center"
+                                        SelectedDate="{Binding DailyExpenseDate}"
+                                        materialDesign:HintAssist.Hint="اختيار يوم / شهر / سنة"
+                                        Style="{StaticResource ModernDatePickerStyle}" />
+                            <Button Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding ApplyDailyFilterCommand}"
+                                    Content="تطبيق"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding ResetDailyFilterCommand}"
+                                    Content="إعادة ضبط"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2"
+                        MinHeight="132"
+                        VerticalAlignment="Stretch"
+                        Style="{StaticResource SectionCardStyle}">
+                    <Grid VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="مصاريف الشهر" />
+                        <StackPanel Grid.Row="1"
+                                    Margin="0,12,0,0"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                            <ComboBox Width="145"
+                                      VerticalAlignment="Center"
+                                      DisplayMemberPath="Name"
+                                      ItemsSource="{Binding Months}"
+                                      SelectedValue="{Binding SelectedMonth}"
+                                      SelectedValuePath="Value"
+                                      materialDesign:HintAssist.Hint="الشهر"
+                                      Style="{StaticResource ModernComboBoxStyle}" />
+                            <ComboBox Width="105"
+                                      Margin="8,0,0,0"
+                                      VerticalAlignment="Center"
+                                      ItemsSource="{Binding Years}"
+                                      SelectedItem="{Binding SelectedYear}"
+                                      materialDesign:HintAssist.Hint="السنة"
+                                      Style="{StaticResource ModernComboBoxStyle}" />
+                            <Button Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding ApplyMonthlyFilterCommand}"
+                                    Content="تطبيق"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding ResetMonthlyFilterCommand}"
+                                    Content="إعادة ضبط"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource KpiCardStyle}" Background="#FFF7ED" BorderBrush="#FED7AA">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="56" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="مصاريف اليوم" />
+                            <TextBlock Margin="0,10,0,0"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="#EA580C"
+                                       Text="{Binding TodayExpensesTotal, StringFormat=F0}" />
+                        </StackPanel>
+                        <Border Grid.Column="1"
+                                Width="44"
+                                Height="44"
+                                VerticalAlignment="Top"
+                                Background="White"
+                                CornerRadius="12">
+                            <materialDesign:PackIcon HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="#EA580C"
+                                                     Kind="CalendarToday" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource KpiCardStyle}" Background="#F0FDF4" BorderBrush="#BBF7D0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="56" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Foreground="{DynamicResource AppMutedTextBrush}" Text="مصاريف الشهر" />
+                            <TextBlock Margin="0,10,0,0"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppSuccessBrush}"
+                                       Text="{Binding MonthExpensesTotal, StringFormat=F0}" />
+                        </StackPanel>
+                        <Border Grid.Column="1"
+                                Width="44"
+                                Height="44"
+                                VerticalAlignment="Top"
+                                Background="White"
+                                CornerRadius="12">
+                            <materialDesign:PackIcon HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource AppSuccessBrush}"
+                                                     Kind="CalendarMonthOutline" />
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource SectionCardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid MinHeight="320">
+                        <DataGrid x:Name="ExpenseDaysGrid"
+                                  IsReadOnly="True"
+                                  ItemsSource="{Binding ExpenseDays}"
+                                  MouseDoubleClick="ExpenseDaysGrid_MouseDoubleClick"
+                                  RowHeight="48"
+                                  SelectedItem="{Binding SelectedExpenseDay}"
+                                  Style="{StaticResource ModernDataGridStyle}">
+                            <DataGrid.Resources>
+                                <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="Padding" Value="8,0" />
+                                </Style>
+                            </DataGrid.Resources>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Width="220"
+                                                    Binding="{Binding ExpenseDate}"
+                                                    Header="التاريخ">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Width="*"
+                                                    Binding="{Binding TotalAmount, StringFormat={}{0:F0}}"
+                                                    Header="إجمالي المصاريف">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Width="100" Header="إجراءات">
+                                    <DataGridTemplateColumn.CellStyle>
+                                        <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
+                                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        </Style>
+                                    </DataGridTemplateColumn.CellStyle>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding DataContext.ViewRowCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="عرض"
+                                                    Style="{StaticResource HomeExpenseGridActionButtonStyle}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <Border IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="Border" BasedOn="{StaticResource EmptyStateCardStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=ExpenseDaysGrid, Path=Items.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Text="لا توجد مصاريف مسجلة." />
+                        </Border>
+                    </Grid>
+
+                    <Border Grid.Row="1">
+                        <Border.Style>
+                            <Style TargetType="Border" BasedOn="{StaticResource ErrorBannerStyle}">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Foreground="{DynamicResource AppDangerBrush}"
+                                   Text="{Binding ErrorMessage}"
+                                   TextWrapping="Wrap" />
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
