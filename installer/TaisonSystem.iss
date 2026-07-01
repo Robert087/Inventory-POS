@@ -5,7 +5,7 @@
 #define PublishDir "..\artifacts\publish\TaisonSystem"
 
 [Setup]
-AppId={{F3DB38C9-EB78-46C0-AE29-20B687CA2F83}
+AppId={{F3DB38C9-EB78-46C0-AE29-20B687CA2F83}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
@@ -20,7 +20,7 @@ PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\artifacts\installer
-OutputBaseFilename=Taison-System-Setup-{#MyAppVersion}
+OutputBaseFilename=Taison-System-Setup-{#MyAppVersion}-x64
 SetupIconFile=..\AutoPartsPOS.WPF\Assets\Brand\app-icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2/ultra64
